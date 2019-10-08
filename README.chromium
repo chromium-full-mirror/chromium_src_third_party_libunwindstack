@@ -1,0 +1,33 @@
+Name: libunwindstack
+URL: https://android.googlesource.com/platform/system/core
+Version: android-q-preview-6
+Revision: c620463f775871ecc73fe3ebc3c9cb2d699d789c
+Date: October 8, 2019
+License: Apache 2.0
+License File: LICENSE
+Security Critical: yes
+
+Description:
+Canonical library to unwind Android call stacks.
+
+libunwindstack (and its relevant dependencies) are copied from Android's
+system/core. libunwindstack handles many of the details of unwinding on Android,
+which is inherently more difficult than on other platforms due to the wider
+variety of frame types that occur on Android. These include Java frames, JITted
+Java frames, Chrome C++ frames, and system library C++ frames. Different frame
+types can have different call frame information (CFI) formats that the unwinder
+must parse to know how to move up the stack. These formats include DWARF,
+MiniDebugInfo, and EHABI. libunwindstack handles much of this complexity.
+
+libunwindstack is copied from the Android tree and utilizes common Android
+libraries from that tree. This is analagous to how a static library that is
+built within the Chromium tree might utilize //base and //threading. For
+libunwindstack, we copy its Android tree dependencies into this directory.
+
+Further complicating matters, Chrome is built against a much older version of
+the Android NDK than this version of libunwindstack, which targets Android tip
+of tree. The local modifications made allow libunwindstack to compile against
+Chrome's older version of the NDK.
+
+Local modifications:
+None (source not yet copied)
