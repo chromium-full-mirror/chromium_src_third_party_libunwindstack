@@ -2,54 +2,53 @@
 # Copyright 2019 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-"""Copies the source code required to compile libunwindstack into the
-libunwindstack/src directory."""
+'''Copies the source code required to compile libunwindstack into the
+libunwindstack/src directory.'''
 
 import argparse
 import os
 import shutil
 import subprocess
 import sys
-import textwrap
 
 _LIBUNWINDSTACK_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), os.pardir))
-_LIBUNWINDSTACK_SRC_ROOT = os.path.join(_LIBUNWINDSTACK_ROOT, "src")
+_LIBUNWINDSTACK_SRC_ROOT = os.path.join(_LIBUNWINDSTACK_ROOT, 'src')
 _DIRS_TO_COPY = [
-    "base",
-    "demangle",
-    "liblog",
-    "libprocinfo",
-    "libunwindstack",
+    'base',
+    'demangle',
+    'liblog',
+    'libprocinfo',
+    'libunwindstack',
 ]
-_ALTERNATE_PATH_DICT = {"base": "android-base"}
+_ALTERNATE_PATH_DICT = {'base': 'android-base'}
 
 
-def git_fetch_tag(git_tag):
-  "Fetches the specified upstream git tag."
+def GitFetchTag(git_tag):
+  'Fetches the specified upstream git tag.'
   # Upstream is a direct mirror of Android's platform/system/core. That git
   # repo's ref/heads/* and refs/tags/* are mirrored to origin's
   # refs/upstream/heads/* and refs/upstream/tags/*, respectively. By default,
   # only refs/heads/* and refs/tags/* are fetched, so we need to explicitly
   # fetch the tag we care about.
   subprocess.check_call([
-      "git", "fetch", "origin",
-      "refs/upstream/tags/{0}:refs/tags/{0}".format(git_tag)
+      'git', 'fetch', 'origin',
+      'refs/upstream/tags/{0}:refs/tags/{0}'.format(git_tag)
   ])
 
 
-def copy_dirs_from_upstream(git_tag):
-  """Checks out the required directories from the upstream Android repo and puts
-  them into the src/ directory."""
+def CopyDirsFromUpstream(git_tag):
+  '''Checks out the required directories from the upstream Android repo and puts
+  them into the src/ directory.'''
   os.mkdir(_LIBUNWINDSTACK_SRC_ROOT)
   for path in _DIRS_TO_COPY:
     dir_root_path = os.path.join(_LIBUNWINDSTACK_ROOT, path)
     if os.path.exists(dir_root_path):
-      raise IOError("{} should not exist before running this script.".format(
+      raise IOError('{} should not exist before running this script.'.format(
           dir_root_path))
 
     subprocess.check_call(
-        ["git", "checkout", "refs/tags/{}".format(git_tag), "--", path])
+        ['git', 'checkout', 'refs/tags/{}'.format(git_tag), '--', path])
 
     # Some directories need to be renamed in order for C++ #includes to work
     # correctly.
@@ -61,25 +60,24 @@ def copy_dirs_from_upstream(git_tag):
     shutil.move(dir_root_path, dir_src_path)
 
 
-def main(args):
-  parser = argparse.ArgumentParser(description="""Copies the source code
+def Main():
+  parser = argparse.ArgumentParser(description='''Copies the source code
       required to compile libunwindstack into the libunwindstack/src/
-      directory.""")
+      directory.''')
   parser.add_argument(
-      "git_tag",
-      help="""The git tag for the Android platform/system/core commit that you
-      want to copy the source code from.""")
+      'git_tag',
+      help='''The git tag for the Android platform/system/core commit that you
+      want to copy the source code from.''')
   args = parser.parse_args()
 
   if os.path.exists(_LIBUNWINDSTACK_SRC_ROOT):
-    raise IOError("{} should not exist before running this script.".format(
+    raise IOError('{} should not exist before running this script.'.format(
         _LIBUNWINDSTACK_SRC_ROOT))
 
-  git_fetch_tag(args.git_tag)
-
-  copy_dirs_from_upstream(args.git_tag)
+  GitFetchTag(args.git_tag)
+  CopyDirsFromUpstream(args.git_tag)
   return 0
 
 
-if __name__ == "__main__":
-  sys.exit(main(sys.argv[1:]))
+if __name__ == '__main__':
+  sys.exit(Main())
