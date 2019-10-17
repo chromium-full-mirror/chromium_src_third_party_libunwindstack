@@ -42,8 +42,9 @@ In practice, this looks something like:
    majority of the files in these directories because they add to the checkout
    size but aren't needed to compile libunwindstack.
 
-3. TODO: Write a script or command that takes the files in the patches directory
-   and applies them on top of src/. Document that here.
+3. Apply all existing patches onto the src/ directory with
+   `tools/apply_patches.py`. If any of these patch files need to be modified in
+   order to successfully apply, do so.
 
 4. Try to compile libunwindstack and fix any compile error. Repeat until
    libunwindstack compiles. Generally this will involve adding or removing files
@@ -69,7 +70,15 @@ In practice, this looks something like:
    "Add new patch to make foo.cc not use noncompiling API X".
 
    For any new edits that you must make to make the source files compile, make
-   sure to include a new patch in the patches/ folder in the same CL.
+   sure to generate a corresponding patch in the patches/ folder and upload it
+   in the same CL.
+
+   A patch file can be generated for your change with:
+
+   git diff master -- <modified_file> > patches/000N-your-patch-name.txt
+
+   (Note that it's usually easier to use this manual patch generation method
+   than git format-patch due to how git commits are squashed in Chromium.)
 
 8. Once you're done, make sure that all source files used are listed in the
    `srcs` list of their respective target in BUILD.gn.
@@ -80,3 +89,18 @@ In practice, this looks something like:
 
 Local modifications:
 - Android's base/ directory is renamed android-base/.
+- 0001-lzma-interface.patch:
+
+  Chromium uses an older version of LZMA (15.14, released 2015/12/31) than
+  platform/system/core (18.06, released 2018/12/30). libunwindstack uses the
+  8 parameter XzUnpacker_Code call, which wasn't available until 18.03
+  (http://bit.ly/2Bju4zF).
+
+  The 7 parameter XzUnpacker_Code call is equivalent to the new
+  XzUnpacker_CodeFull call (http://bit.ly/2Bju4zF), which is in turn equivalent
+  to XzUnpacker_Code with the new `srcFinished` parameter set to `true`
+  (http://bit.ly/33IIHsK). Because of this, we can safely delete the `true`
+  `srcFinished` parameter used by libunwindstack and have our 15.14-compliant
+  code be the same as upstream libunwindstack's 18.06-compliant code.
+
+  We also add a missing typedef.

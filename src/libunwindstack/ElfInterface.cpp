@@ -39,6 +39,10 @@
 
 namespace unwindstack {
 
+namespace {
+typedef void* ISzAllocPtr;
+}  // namespace
+
 ElfInterface::~ElfInterface() {
   for (auto symbol : symbols_) {
     delete symbol;
@@ -106,7 +110,7 @@ Memory* ElfInterface::CreateGnuDebugdataMemory() {
       dst_remaining += 2 * gnu_debugdata_size_;
     }
     return_val = XzUnpacker_Code(&state, dst->GetPtr(dst_offset), &dst_remaining, &src[src_offset],
-                                 &src_remaining, true, CODER_FINISH_ANY, &status);
+                                 &src_remaining, CODER_FINISH_ANY, &status);
     src_offset += src_remaining;
     dst_offset += dst_remaining;
   } while (return_val == SZ_OK && status == CODER_STATUS_NOT_FINISHED);
