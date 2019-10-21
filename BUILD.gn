@@ -72,7 +72,6 @@ source_set("libunwindstack") {
   sources = [
     "src/android-base/file.cpp",
     "src/android-base/include/android-base/file.h",
-    "src/android-base/include/android-base/logging.h",
     "src/android-base/include/android-base/macros.h",
     "src/android-base/include/android-base/off64_t.h",
     "src/android-base/include/android-base/parseint.h",
@@ -83,7 +82,6 @@ source_set("libunwindstack") {
     "src/android-base/include/android-base/threads.h",
     "src/android-base/include/android-base/unique_fd.h",
     "src/android-base/include/android-base/utf8.h",
-    "src/android-base/logging.cpp",
     "src/android-base/stringprintf.cpp",
     "src/android-base/strings.cpp",
     "src/android-base/threads.cpp",

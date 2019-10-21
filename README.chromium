@@ -111,3 +111,11 @@ Local modifications:
   in Android NDK version 16 (it was first made available in 17, as per
   https://bit.ly/2MSMlt5). `TemporaryDir` is unused by libunwindstack, though,
   so we safely remove the entire class.
+
+- 0003-remove-file-logging.patch:
+
+  Removes all instances of PLOG() from android-base/file.cpp, which allows us to
+  remove the dependency on android-base/logging.cpp. logging.cpp is problematic
+  because it attempts to use BSD's getprogname(), which isn't available in
+  Android NDK version 16 (it was first made available in 21, as per
+  https://bit.ly/2nX0nBs).
