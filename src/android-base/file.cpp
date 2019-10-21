@@ -18,7 +18,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <ftw.h>
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -128,46 +127,6 @@ int TemporaryFile::release() {
 void TemporaryFile::init(const std::string& tmp_dir) {
   snprintf(path, sizeof(path), "%s%cTemporaryFile-XXXXXX", tmp_dir.c_str(), OS_PATH_SEPARATOR);
   fd = mkstemp(path);
-}
-
-TemporaryDir::TemporaryDir() {
-  init(GetSystemTempDir());
-}
-
-TemporaryDir::~TemporaryDir() {
-  if (!remove_dir_and_contents_) return;
-
-  auto callback = [](const char* child, const struct stat*, int file_type, struct FTW*) -> int {
-    switch (file_type) {
-      case FTW_D:
-      case FTW_DP:
-      case FTW_DNR:
-        if (rmdir(child) == -1) {
-          PLOG(ERROR) << "rmdir " << child;
-        }
-        break;
-      case FTW_NS:
-      default:
-        if (rmdir(child) != -1) break;
-        // FALLTHRU (for gcc, lint, pcc, etc; and following for clang)
-        FALLTHROUGH_INTENDED;
-      case FTW_F:
-      case FTW_SL:
-      case FTW_SLN:
-        if (unlink(child) == -1) {
-          PLOG(ERROR) << "unlink " << child;
-        }
-        break;
-    }
-    return 0;
-  };
-
-  nftw(path, callback, 128, FTW_DEPTH | FTW_MOUNT | FTW_PHYS);
-}
-
-bool TemporaryDir::init(const std::string& tmp_dir) {
-  snprintf(path, sizeof(path), "%s%cTemporaryDir-XXXXXX", tmp_dir.c_str(), OS_PATH_SEPARATOR);
-  return (mkdtemp(path) != nullptr);
 }
 
 namespace android {

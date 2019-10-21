@@ -92,15 +92,22 @@ Local modifications:
 - 0001-lzma-interface.patch:
 
   Chromium uses an older version of LZMA (15.14, released 2015/12/31) than
-  platform/system/core (18.06, released 2018/12/30). libunwindstack uses the
-  8 parameter XzUnpacker_Code call, which wasn't available until 18.03
-  (http://bit.ly/2Bju4zF).
+  platform/system/core (18.06, released 2018/12/30). libunwindstack uses the 8
+  parameter XzUnpacker_Code call, which wasn't available until 18.03
+  (https://bit.ly/2Bju4zF).
 
   The 7 parameter XzUnpacker_Code call is equivalent to the new
-  XzUnpacker_CodeFull call (http://bit.ly/2Bju4zF), which is in turn equivalent
+  XzUnpacker_CodeFull call (https://bit.ly/2Bju4zF), which is in turn equivalent
   to XzUnpacker_Code with the new `srcFinished` parameter set to `true`
-  (http://bit.ly/33IIHsK). Because of this, we can safely delete the `true`
+  (https://bit.ly/33IIHsK). Because of this, we can safely delete the `true`
   `srcFinished` parameter used by libunwindstack and have our 15.14-compliant
   code be the same as upstream libunwindstack's 18.06-compliant code.
 
   We also add a missing typedef.
+
+- 0002-remove-temporarydir.patch:
+
+  The `TemporaryDir` destructor uses the `nftw` function, which isn't available
+  in Android NDK version 16 (it was first made available in 17, as per
+  https://bit.ly/2MSMlt5). `TemporaryDir` is unused by libunwindstack, though,
+  so we safely remove the entire class.
