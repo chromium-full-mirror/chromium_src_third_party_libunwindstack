@@ -8,6 +8,7 @@ source_set("libunwindstack") {
   ]
   include_dirs = [
     "//third_party/libunwindstack/src/android-base/include",
+    "//third_party/libunwindstack/src/compat",
     "//third_party/libunwindstack/src/demangle/include",
     "//third_party/libunwindstack/src/liblog/include",
     "//third_party/libunwindstack/src/libprocinfo/include",
@@ -85,6 +86,8 @@ source_set("libunwindstack") {
     "src/android-base/stringprintf.cpp",
     "src/android-base/strings.cpp",
     "src/android-base/threads.cpp",
+    "src/compat/compat.cc",
+    "src/compat/compat.h",
     "src/demangle/Demangler.cpp",
     "src/demangle/Demangler.h",
     "src/demangle/include/demangle.h",

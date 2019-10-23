@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include <compat/compat.h>
 #include <unwindstack/Global.h>
 #include <unwindstack/MapInfo.h>
 #include <unwindstack/Maps.h>
@@ -42,7 +43,7 @@ void Global::SetArch(ArchEnum arch) {
 uint64_t Global::GetVariableOffset(MapInfo* info, const std::string& variable) {
   if (!search_libs_.empty()) {
     bool found = false;
-    const char* lib = basename(info->name.c_str());
+    const char* lib = compat_basename(info->name.c_str());
     for (const std::string& name : search_libs_) {
       if (name == lib) {
         found = true;

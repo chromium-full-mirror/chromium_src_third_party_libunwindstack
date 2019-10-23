@@ -119,3 +119,13 @@ Local modifications:
   because it attempts to use BSD's getprogname(), which isn't available in
   Android NDK version 16 (it was first made available in 21, as per
   https://bit.ly/2nX0nBs).
+
+- 0004-gnu-basename.patch:
+
+  Adds a short implementation of the non-modifying GNU basename() function
+  which isn't available in Android NDK version 16 (it was first made available
+  in 23, as per https://bit.ly/31Gkyl9). We call this function `compat_basename`.
+
+  Although there's a POSIX basename() available via <libgen.h>, that function
+  has different behavior with regards to trailing slashes and can also modify
+  its argument under some circumstances.
