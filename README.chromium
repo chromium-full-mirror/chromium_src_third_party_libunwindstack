@@ -129,3 +129,8 @@ Local modifications:
   Although there's a POSIX basename() available via <libgen.h>, that function
   has different behavior with regards to trailing slashes and can also modify
   its argument under some circumstances.
+
+- 0005-disable-fdsan.patch:
+
+  Disables fdsan on unique_fd.h. fdsan isn't available in Android NDK version 16
+  (it was first made available in 29, as per https://bit.ly/2W4II7E).
