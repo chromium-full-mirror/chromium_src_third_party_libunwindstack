@@ -134,3 +134,10 @@ Local modifications:
 
   Disables fdsan on unique_fd.h. fdsan isn't available in Android NDK version 16
   (it was first made available in 29, as per https://bit.ly/2W4II7E).
+
+- 0006-memory-process-vm-readv.patch:
+
+  Uses syscall() to call process_vm_readv instead of the process_vm_readv()
+  function, which isn't available in Android NDK 16 (it was first made available
+  in 23, as per https://bit.ly/3412rb7). The syscall() version was already
+  available, as per https://bit.ly/32Tnyvy.
