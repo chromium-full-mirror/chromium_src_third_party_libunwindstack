@@ -57,14 +57,10 @@ def ExtractSources(ninja_build_dir):
   ],
                                             stdout=subprocess.PIPE,
                                             stderr=sys.stderr)
-  dump_files_process = subprocess.Popen(['xargs', 'cat'],
-                                        stdin=aggregate_deps_process.stdout,
-                                        stdout=subprocess.PIPE,
-                                        stderr=sys.stderr)
-  unique_files = subprocess.check_output(['sort', '-u'],
-                                         stdin=dump_files_process.stdout,
-                                         stderr=sys.stderr).decode(
-                                             sys.stdout.encoding)
+  sources = subprocess.check_output(['xargs', 'cat'],
+                                    stdin=aggregate_deps_process.stdout,
+                                    stderr=sys.stderr).decode(
+                                        sys.stdout.encoding)
 
   # Each of the .o.d files is actually in Makefile form, like:
   #
@@ -81,7 +77,8 @@ def ExtractSources(ninja_build_dir):
   # We're looking explicitly for the platform/system/core C++ source code
   # dependencies, so we use a regexp to extract these and ignore other
   # dependencies (e.g. src/third_party/lzma_sdk/) and .o target names.
-  return re.findall(r"third_party/libunwindstack/(src/\S+)", unique_files)
+  rel_sources = re.findall(r"third_party/libunwindstack/(src/\S+)", sources)
+  return sorted(set(rel_sources))
 
 
 def PrintGnFormattedSources(sources):
