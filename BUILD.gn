@@ -3,7 +3,9 @@
 # found in the LICENSE file.
 
 source_set("libunwindstack") {
-  visibility = [ "//base" ]
+  visibility = [
+    "//base:native_unwinder_android",
+  ]
   include_dirs = [
     "//third_party/libunwindstack/src/android-base/include",
     "//third_party/libunwindstack/src/compat",
@@ -146,5 +148,6 @@ source_set("libunwindstack") {
   cflags = [
     # We don't need .dex file support.
     "-DNO_LIBDEXFILE_SUPPORT",
+    "-Wno-c99-designator",
   ]
 }
