@@ -2,6 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+config("libunwindstack_config") {
+  cflags = [
+    # Using -isystem instead of include_dirs (-I) is required because libunwindstack
+    # includes its headers via angle brackets.
+    "-isystem",
+    rebase_path("src/libunwindstack/include", root_build_dir),
+  ]
+  # We don't need .dex file support.
+  defines = [ "NO_LIBDEXFILE_SUPPORT" ]
+}
+
 source_set("libunwindstack") {
   visibility = [
     "//base:native_unwinder_android",
@@ -146,8 +157,7 @@ source_set("libunwindstack") {
     "//third_party/lzma_sdk:lzma_sdk_xz",
   ]
   cflags = [
-    # We don't need .dex file support.
-    "-DNO_LIBDEXFILE_SUPPORT",
     "-Wno-c99-designator",
   ]
+  public_configs = [ ":libunwindstack_config" ]
 }
