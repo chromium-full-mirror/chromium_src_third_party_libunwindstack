@@ -153,6 +153,12 @@ source_set("libunwindstack") {
     "src/libunwindstack/Symbols.h",
     "src/libunwindstack/Unwinder.cpp",
   ]
+  if (target_cpu == "x86") {
+    sources += [ "src/libunwindstack/AsmGetRegsX86.S" ]
+  }
+  else if (target_cpu == "x64") {
+    sources += [ "src/libunwindstack/AsmGetRegsX86_64.S" ]
+  }
   deps = [
     "//third_party/lzma_sdk:lzma_sdk_xz",
   ]
