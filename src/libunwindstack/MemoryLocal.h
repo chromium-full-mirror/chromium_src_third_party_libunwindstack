@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef __LIB_DEMANGLE_H_
-#define __LIB_DEMANGLE_H_
+#ifndef _LIBUNWINDSTACK_MEMORY_LOCAL_H
+#define _LIBUNWINDSTACK_MEMORY_LOCAL_H
 
-#include <string>
+#include <stdint.h>
 
-// If the name cannot be demangled, the original name will be returned as
-// a std::string. If the name can be demangled, then the demangled name
-// will be returned as a std::string.
-std::string demangle(const char* name);
+#include <unwindstack/Memory.h>
 
-#endif  // __LIB_DEMANGLE_H_
+namespace unwindstack {
+
+class MemoryLocal : public Memory {
+ public:
+  MemoryLocal() = default;
+  virtual ~MemoryLocal() = default;
+
+  size_t Read(uint64_t addr, void* dst, size_t size) override;
+};
+
+}  // namespace unwindstack
+
+#endif  // _LIBUNWINDSTACK_MEMORY_LOCAL_H

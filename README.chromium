@@ -1,8 +1,7 @@
 Name: libunwindstack
 URL: https://android.googlesource.com/platform/system/core
-Version: android-q-preview-6
-Revision: c620463f775871ecc73fe3ebc3c9cb2d699d789c
-Date: October 8, 2019
+Revision: a7b4c5d25aebc2c7e6156473dae98238c029e630
+Date: March 31, 2020
 License: Apache 2.0
 License File: LICENSE
 Security Critical: yes

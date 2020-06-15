@@ -21,8 +21,9 @@
 
 #include <string>
 
-#include <android-base/macros.h>
+#include "android-base/macros.h"
 #include "android-base/off64_t.h"
+#include "android-base/unique_fd.h"
 
 #if !defined(_WIN32) && !defined(O_BINARY)
 /** Windows needs O_BINARY, but Unix never mangles line endings. */
@@ -57,16 +58,33 @@ class TemporaryFile {
   DISALLOW_COPY_AND_ASSIGN(TemporaryFile);
 };
 
+class TemporaryDir {
+ public:
+  TemporaryDir();
+  ~TemporaryDir();
+  // Don't remove the temporary dir in the destructor.
+  void DoNotRemove() { remove_dir_and_contents_ = false; }
+
+  char path[1024];
+
+ private:
+  bool init(const std::string& tmp_dir);
+
+  bool remove_dir_and_contents_ = true;
+
+  DISALLOW_COPY_AND_ASSIGN(TemporaryDir);
+};
+
 namespace android {
 namespace base {
 
-bool ReadFdToString(int fd, std::string* content);
+bool ReadFdToString(borrowed_fd fd, std::string* content);
 bool ReadFileToString(const std::string& path, std::string* content,
                       bool follow_symlinks = false);
 
 bool WriteStringToFile(const std::string& content, const std::string& path,
                        bool follow_symlinks = false);
-bool WriteStringToFd(const std::string& content, int fd);
+bool WriteStringToFd(const std::string& content, borrowed_fd fd);
 
 #if !defined(_WIN32)
 bool WriteStringToFile(const std::string& content, const std::string& path,
@@ -74,7 +92,7 @@ bool WriteStringToFile(const std::string& content, const std::string& path,
                        bool follow_symlinks = false);
 #endif
 
-bool ReadFully(int fd, void* data, size_t byte_count);
+bool ReadFully(borrowed_fd fd, void* data, size_t byte_count);
 
 // Reads `byte_count` bytes from the file descriptor at the specified offset.
 // Returns false if there was an IO error or EOF was reached before reading `byte_count` bytes.
@@ -84,9 +102,9 @@ bool ReadFully(int fd, void* data, size_t byte_count);
 // get modified. This means that ReadFullyAtOffset can be used concurrently with other calls to the
 // same function, but concurrently seeking or reading incrementally can lead to unexpected
 // behavior.
-bool ReadFullyAtOffset(int fd, void* data, size_t byte_count, off64_t offset);
+bool ReadFullyAtOffset(borrowed_fd fd, void* data, size_t byte_count, off64_t offset);
 
-bool WriteFully(int fd, const void* data, size_t byte_count);
+bool WriteFully(borrowed_fd fd, const void* data, size_t byte_count);
 
 bool RemoveFileIfExists(const std::string& path, std::string* err = nullptr);
 

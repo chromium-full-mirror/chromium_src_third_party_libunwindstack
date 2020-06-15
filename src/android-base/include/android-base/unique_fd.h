@@ -46,11 +46,7 @@
 // unique_fd is also known as ScopedFd/ScopedFD/scoped_fd; mentioned here to help
 // you find this class if you're searching for one of those names.
 
-#if defined(__BIONIC__) && defined(__ANDROID_API__) && __ANDROID_API__ >= 29
-  #define FDSAN_AVAILABLE 1
-#endif
-
-#if defined(FDSAN_AVAILABLE)
+#if defined(__BIONIC__)
 #include <android/fdsan.h>
 #endif
 
@@ -58,7 +54,7 @@ namespace android {
 namespace base {
 
 struct DefaultCloser {
-#if defined(FDSAN_AVAILABLE)
+#if defined(__BIONIC__)
   static void Tag(int fd, void* old_addr, void* new_addr) {
     if (android_fdsan_exchange_owner_tag) {
       uint64_t old_tag = android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_UNIQUE_FD,
@@ -96,6 +92,8 @@ class unique_fd_impl final {
   explicit unique_fd_impl(int fd) { reset(fd); }
   ~unique_fd_impl() { reset(); }
 
+  unique_fd_impl(const unique_fd_impl&) = delete;
+  void operator=(const unique_fd_impl&) = delete;
   unique_fd_impl(unique_fd_impl&& other) noexcept { reset(other.release()); }
   unique_fd_impl& operator=(unique_fd_impl&& s) noexcept {
     int fd = s.fd_;
@@ -104,13 +102,27 @@ class unique_fd_impl final {
     return *this;
   }
 
-  void reset(int new_value = -1) { reset(new_value, nullptr); }
+  [[clang::reinitializes]] void reset(int new_value = -1) { reset(new_value, nullptr); }
 
   int get() const { return fd_; }
+
+#if !defined(ANDROID_BASE_UNIQUE_FD_DISABLE_IMPLICIT_CONVERSION)
+  // unique_fd's operator int is dangerous, but we have way too much code that
+  // depends on it, so make this opt-in at first.
   operator int() const { return get(); }  // NOLINT
+#endif
+
+  bool operator>=(int rhs) const { return get() >= rhs; }
+  bool operator<(int rhs) const { return get() < rhs; }
+  bool operator==(int rhs) const { return get() == rhs; }
+  bool operator!=(int rhs) const { return get() != rhs; }
+  bool operator==(const unique_fd_impl& rhs) const { return get() == rhs.get(); }
+  bool operator!=(const unique_fd_impl& rhs) const { return get() != rhs.get(); }
 
   // Catch bogus error checks (i.e.: "!fd" instead of "fd != -1").
   bool operator!() const = delete;
+
+  bool ok() const { return get() >= 0; }
 
   int release() __attribute__((warn_unused_result)) {
     tag(fd_, this, nullptr);
@@ -161,9 +173,6 @@ class unique_fd_impl final {
   static auto close(int fd, void*) -> decltype(T::Close(fd), void()) {
     T::Close(fd);
   }
-
-  unique_fd_impl(const unique_fd_impl&);
-  void operator=(const unique_fd_impl&);
 };
 
 using unique_fd = unique_fd_impl<DefaultCloser>;
@@ -250,6 +259,22 @@ inline DIR* Fdopendir(unique_fd&& ufd) {
 
 #endif  // !defined(_WIN32)
 
+// A wrapper type that can be implicitly constructed from either int or unique_fd.
+struct borrowed_fd {
+  /* implicit */ borrowed_fd(int fd) : fd_(fd) {}  // NOLINT
+  template <typename T>
+  /* implicit */ borrowed_fd(const unique_fd_impl<T>& ufd) : fd_(ufd.get()) {}  // NOLINT
+
+  int get() const { return fd_; }
+
+  bool operator>=(int rhs) const { return get() >= rhs; }
+  bool operator<(int rhs) const { return get() < rhs; }
+  bool operator==(int rhs) const { return get() == rhs; }
+  bool operator!=(int rhs) const { return get() != rhs; }
+
+ private:
+  int fd_ = -1;
+};
 }  // namespace base
 }  // namespace android
 

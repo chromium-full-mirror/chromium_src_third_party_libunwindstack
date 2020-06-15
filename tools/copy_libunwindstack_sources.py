@@ -17,7 +17,6 @@ _LIBUNWINDSTACK_ROOT = os.path.abspath(
 _LIBUNWINDSTACK_SRC_ROOT = os.path.join(_LIBUNWINDSTACK_ROOT, 'src')
 _DIRS_TO_COPY = [
     'base',
-    'demangle',
     'liblog',
     'libprocinfo',
     'libunwindstack',
