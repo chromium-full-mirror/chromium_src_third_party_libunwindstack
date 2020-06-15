@@ -18,7 +18,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <ftw.h>
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,10 +43,16 @@
 #define OS_PATH_SEPARATOR '/'
 #endif
 
-#include "android-base/logging.h"  // and must be after windows.h for ERROR
 #include "android-base/macros.h"   // For TEMP_FAILURE_RETRY on Darwin.
 #include "android-base/unique_fd.h"
 #include "android-base/utf8.h"
+
+class FakeLog {
+ public:
+  FakeLog operator<<(const char*) { return *this; }
+  operator bool() { return false; }
+};
+#define PLOG(x) false && FakeLog()
 
 namespace {
 
@@ -171,6 +176,7 @@ TemporaryDir::TemporaryDir() {
 TemporaryDir::~TemporaryDir() {
   if (!remove_dir_and_contents_) return;
 
+#if 0  // Requires __ANDROID_API__ >= 17.
   auto callback = [](const char* child, const struct stat*, int file_type, struct FTW*) -> int {
     switch (file_type) {
       case FTW_D:
@@ -197,6 +203,7 @@ TemporaryDir::~TemporaryDir() {
   };
 
   nftw(path, callback, 128, FTW_DEPTH | FTW_MOUNT | FTW_PHYS);
+#endif
 }
 
 bool TemporaryDir::init(const std::string& tmp_dir) {

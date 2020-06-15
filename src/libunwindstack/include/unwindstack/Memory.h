@@ -31,6 +31,7 @@ class Memory {
   Memory() = default;
   virtual ~Memory() = default;
 
+  static std::unique_ptr<Memory> CreateLocalProcessMemory();
   static std::shared_ptr<Memory> CreateProcessMemory(pid_t pid);
   static std::shared_ptr<Memory> CreateProcessMemoryCached(pid_t pid);
   static std::shared_ptr<Memory> CreateOfflineMemory(const uint8_t* data, uint64_t start,

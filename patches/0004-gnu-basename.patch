@@ -1,6 +1,6 @@
 diff --git a/src/compat/compat/compat.cc b/src/compat/compat/compat.cc
 new file mode 100644
-index 0000000..7a671e0
+index 000000000..7a671e007
 --- /dev/null
 +++ b/src/compat/compat/compat.cc
 @@ -0,0 +1,14 @@
@@ -20,7 +20,7 @@ index 0000000..7a671e0
 +}
 diff --git a/src/compat/compat/compat.h b/src/compat/compat/compat.h
 new file mode 100644
-index 0000000..7fbc5d1
+index 000000000..7fbc5d158
 --- /dev/null
 +++ b/src/compat/compat/compat.h
 @@ -0,0 +1,19 @@
@@ -44,7 +44,7 @@ index 0000000..7fbc5d1
 +
 +#endif  // COMPAT_COMPAT_H_
 diff --git a/src/libunwindstack/Global.cpp b/src/libunwindstack/Global.cpp
-index a20be00..a1fbfc4 100644
+index ee6c8a593..68818e416 100644
 --- a/src/libunwindstack/Global.cpp
 +++ b/src/libunwindstack/Global.cpp
 @@ -21,6 +21,7 @@
@@ -55,29 +55,29 @@ index a20be00..a1fbfc4 100644
  #include <unwindstack/Global.h>
  #include <unwindstack/MapInfo.h>
  #include <unwindstack/Maps.h>
-@@ -42,7 +43,7 @@ void Global::SetArch(ArchEnum arch) {
- uint64_t Global::GetVariableOffset(MapInfo* info, const std::string& variable) {
-   if (!search_libs_.empty()) {
-     bool found = false;
--    const char* lib = basename(info->name.c_str());
-+    const char* lib = compat_basename(info->name.c_str());
-     for (const std::string& name : search_libs_) {
-       if (name == lib) {
-         found = true;
+@@ -48,7 +49,7 @@ bool Global::Searchable(const std::string& name) {
+     return false;
+   }
+ 
+-  const char* base_name = basename(name.c_str());
++  const char* base_name = compat_basename(name.c_str());
+   for (const std::string& lib : search_libs_) {
+     if (base_name == lib) {
+       return true;
 diff --git a/src/libunwindstack/Unwinder.cpp b/src/libunwindstack/Unwinder.cpp
-index 3f2e1c1..be70b8a 100644
+index 1bb031947..d5d9022ac 100644
 --- a/src/libunwindstack/Unwinder.cpp
 +++ b/src/libunwindstack/Unwinder.cpp
-@@ -28,6 +28,7 @@
- 
- #include <demangle.h>
+@@ -27,6 +27,7 @@
+ #include <android-base/stringprintf.h>
+ #include <android-base/strings.h>
  
 +#include <compat/compat.h>
  #include <unwindstack/Elf.h>
  #include <unwindstack/JitDebug.h>
  #include <unwindstack/MapInfo.h>
-@@ -196,7 +197,7 @@ void Unwinder::Unwind(const std::vector<std::string>* initial_map_names_to_skip,
- 
+@@ -203,7 +204,7 @@ void Unwinder::Unwind(const std::vector<std::string>* initial_map_names_to_skip,
+     FrameData* frame = nullptr;
      if (map_info == nullptr || initial_map_names_to_skip == nullptr ||
          std::find(initial_map_names_to_skip->begin(), initial_map_names_to_skip->end(),
 -                  basename(map_info->name.c_str())) == initial_map_names_to_skip->end()) {

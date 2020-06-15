@@ -27,6 +27,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 
+#include <compat/compat.h>
 #include <unwindstack/Elf.h>
 #include <unwindstack/JitDebug.h>
 #include <unwindstack/MapInfo.h>
@@ -203,7 +204,7 @@ void Unwinder::Unwind(const std::vector<std::string>* initial_map_names_to_skip,
     FrameData* frame = nullptr;
     if (map_info == nullptr || initial_map_names_to_skip == nullptr ||
         std::find(initial_map_names_to_skip->begin(), initial_map_names_to_skip->end(),
-                  basename(map_info->name.c_str())) == initial_map_names_to_skip->end()) {
+                  compat_basename(map_info->name.c_str())) == initial_map_names_to_skip->end()) {
       if (regs_->dex_pc() != 0) {
         // Add a frame to represent the dex file.
         FillInDexFrame();

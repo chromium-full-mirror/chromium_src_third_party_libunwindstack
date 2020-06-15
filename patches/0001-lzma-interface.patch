@@ -1,5 +1,5 @@
 diff --git a/src/libunwindstack/ElfInterface.cpp b/src/libunwindstack/ElfInterface.cpp
-index dee8eb3..e4d9aa5 100644
+index 341275dbb..8725ad375 100644
 --- a/src/libunwindstack/ElfInterface.cpp
 +++ b/src/libunwindstack/ElfInterface.cpp
 @@ -39,6 +39,10 @@
@@ -13,8 +13,8 @@ index dee8eb3..e4d9aa5 100644
  ElfInterface::~ElfInterface() {
    for (auto symbol : symbols_) {
      delete symbol;
-@@ -106,7 +110,7 @@ Memory* ElfInterface::CreateGnuDebugdataMemory() {
-       dst_remaining += 2 * gnu_debugdata_size_;
+@@ -129,7 +133,7 @@ Memory* ElfInterface::CreateGnuDebugdataMemory() {
+       dst_remaining += buffer_increment;
      }
      return_val = XzUnpacker_Code(&state, dst->GetPtr(dst_offset), &dst_remaining, &src[src_offset],
 -                                 &src_remaining, true, CODER_FINISH_ANY, &status);

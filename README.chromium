@@ -105,20 +105,19 @@ Local modifications:
 
   We also add a missing typedef.
 
-- 0002-remove-temporarydir.patch:
+- 0002-disable-ftw.patch:
 
   The `TemporaryDir` destructor uses the `nftw` function, which isn't available
   in Android NDK version 16 (it was first made available in 17, as per
   https://bit.ly/2MSMlt5). `TemporaryDir` is unused by libunwindstack, though,
-  so we safely remove the entire class.
+  so we safely disable the call.
 
 - 0003-remove-file-logging.patch:
 
-  Removes all instances of PLOG() from android-base/file.cpp, which allows us to
-  remove the dependency on android-base/logging.cpp. logging.cpp is problematic
-  because it attempts to use BSD's getprogname(), which isn't available in
-  Android NDK version 16 (it was first made available in 21, as per
-  https://bit.ly/2nX0nBs).
+  Stubs out PLOG() in android-base/file.cpp, which allows us to remove the
+  dependency on android-base/logging.cpp. logging.cpp is problematic because it
+  attempts to use BSD's getprogname(), which isn't available in Android NDK
+  version 16 (it was first made available in 21, as per https://bit.ly/2nX0nBs).
 
 - 0004-gnu-basename.patch:
 
@@ -141,3 +140,8 @@ Local modifications:
   function, which isn't available in Android NDK 16 (it was first made available
   in 23, as per https://bit.ly/3412rb7). The syscall() version was already
   available, as per https://bit.ly/32Tnyvy.
+
+- 0007-create-local-process-memory.patch:
+
+  Exposes an interface to create and return a Memory subclass for reading local
+  process memory, as a unique_ptr.

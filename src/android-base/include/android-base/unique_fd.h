@@ -46,7 +46,11 @@
 // unique_fd is also known as ScopedFd/ScopedFD/scoped_fd; mentioned here to help
 // you find this class if you're searching for one of those names.
 
-#if defined(__BIONIC__)
+#if defined(__BIONIC__) && defined(__ANDROID_API__) && __ANDROID_API__ >= 29
+  #define FDSAN_AVAILABLE 1
+#endif
+
+#if defined(FDSAN_AVAILABLE)
 #include <android/fdsan.h>
 #endif
 
@@ -54,7 +58,7 @@ namespace android {
 namespace base {
 
 struct DefaultCloser {
-#if defined(__BIONIC__)
+#if defined(FDSAN_AVAILABLE)
   static void Tag(int fd, void* old_addr, void* new_addr) {
     if (android_fdsan_exchange_owner_tag) {
       uint64_t old_tag = android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_UNIQUE_FD,
