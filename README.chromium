@@ -29,63 +29,64 @@ the Android NDK than this version of libunwindstack, which targets Android tip
 of tree. The local modifications made allow libunwindstack to compile against
 Chrome's older version of the NDK.
 
-To update libunwindstack, you generally get everything compiling locally, then
-go back and structure a logical sequence of CLs to get to that point.
+Steps to update libunwindstack:
 
-In practice, this looks something like:
+1. Update the contents to the upstream revision.
 
-1. Remove the src/ directory.
+   git checkout master && git pull -q
+   git checkout -b update && git cl upstream master
+   rm -rf src
+   tools/copy_libunwindstack_sources.py <upstream_git_tag>
+   # ... manually update the revision info in README.chromium ...
+   git add --all
+   git commit -m 'step 1'
 
-2. Copy the full source directories for the folders we need. This can be done
-   with `tools/copy_libunwindstack_sources.py <upstream_git_tag>`. Do NOT
-   submit a CL with these full directories: we still need to delete the vast
-   majority of the files in these directories because they add to the checkout
-   size but aren't needed to compile libunwindstack.
+2. Build and apply/update/add patches until the code compiles. Update existing
+   patches so that they apply cleanly. Remove any patches that are no longer
+   required. Assumes out/Debug is configured for an Android component build.
 
-3. Apply all existing patches onto the src/ directory with
-   `tools/apply_patches.py`. If any of these patch files need to be modified in
-   order to successfully apply, do so.
+   (cd ../.. && autoninja -C out/Debug libstack_unwinder.cr.so)
+   patch -p1 < patches/...  # etc.
 
-4. Try to compile libunwindstack and fix any compile error. Repeat until
-   libunwindstack compiles. Generally this will involve adding or removing files
-   from BUILD.gn or editing source files to not use Android NDK APIs that are
-   newer than the version of Android that Chrome targets. If files from an
-   new directory are needed, `copy_libunwindstack_sources.py` should be updated
-   appropriately.
+   # Remove remnants of failed patch attempts.
+   find src -name \*.orig -o -name \*.rej | xargs rm
+   git add --all
+   git commit -m 'step 2'
 
-5. TODO: Write a script that removes unneeded source files from src/. Document
-   that script here.
+3. Prune to the subset of libunwindstack sources that should be compiled and
+   checked in.
 
-6. Send out and submit a CL adding the files from Android platform/system/core
-   that were ultimately required to compile libunwindstack, but without any
-   changes that you had to make in order to get them to compile.
+   tools/get_required_sources.sh out/Debug > required_sources
 
-   This CL will act as a diffbase that makes it possible to review the
-   incremental changes that you had to make to get libunwindstack to compile.
+   # Replace BUILD.gn 'public' files with these:
+   grep src/libunwindstack/include required_sources | sed 's/.*/    "&",/'
 
-   Note that after you submit this CL, `master` will be in a noncompiling state.
+   # Replace BUILD.gn 'sources' files with these:
+   grep -v 'src/libunwindstack/include\|\.S$' required_sources | \
+     sed 's/.*/    "&",/'
 
-7. One at a time, send out CLs for the changes you needed to make to get to a
-   compiling state. For example, "Apply existing patches on top of Android-R",
-   "Add new patch to make foo.cc not use noncompiling API X".
+   # Remove unused files.
+   find src -type f | sort | comm -2 -3 - required_sources | xargs rm
+   find src -depth -type d -empty -exec rmdir \{\} \;
+   rm required_sources
+   git add -u src
+   git commit -m 'step 3'
 
-   For any new edits that you must make to make the source files compile, make
-   sure to generate a corresponding patch in the patches/ folder and upload it
-   in the same CL.
+4. Prepare CLs to land the changes. Using `git rebase -i master` reorder the
+   commits as
 
-   A patch file can be generated for your change with:
+     step 1
+     step 3
+     step 2
 
-   git diff master -- <modified_file> > patches/000N-your-patch-name.txt
+   and squash the step 3 commit into step 1.
 
-   (Note that it's usually easier to use this manual patch generation method
-   than git format-patch due to how git commits are squashed in Chromium.)
+   Land a CL with step1, which contains the upstream libunwindstack changes to
+   the files we need. After landing `master` will be in a noncompiling state.
 
-8. Once you're done, make sure that all source files used are listed in the
-   `srcs` list of their respective target in BUILD.gn.
+   Land a CL with step2, which contains the Chrome-specific changes required to
+   build libunwindstack.
 
-   TODO: Write a script to make this easy (it will be very similar to the script
-   to remove unnecessary files, as they both use the results of ninja -d
-   keepdeps).
 
 Local modifications:
 - Android's base/ directory is renamed android-base/.

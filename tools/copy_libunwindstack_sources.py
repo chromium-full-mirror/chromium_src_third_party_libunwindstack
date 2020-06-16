@@ -7,6 +7,7 @@ libunwindstack/src directory.'''
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -33,11 +34,15 @@ def GitFetchTag(git_tag):
   # fetch the tag we care about.
   subprocess.check_call([
       'git', 'fetch', 'origin',
-      'refs/upstream/tags/{0}:refs/tags/{0}'.format(git_tag)
+      'refs/upstream/tags/{0}'.format(git_tag)
   ])
 
+def GitFetchRevision(revision):
+  'Fetches the specified upstream git revision.'
+  subprocess.check_call(['git', 'fetch', 'origin', revision])
 
-def CopyDirsFromUpstream(git_tag):
+
+def CopyDirsFromUpstream(git_rev):
   '''Checks out the required directories from the upstream Android repo and puts
   them into the src/ directory.'''
   os.mkdir(_LIBUNWINDSTACK_SRC_ROOT)
@@ -48,7 +53,7 @@ def CopyDirsFromUpstream(git_tag):
           dir_root_path))
 
     subprocess.check_call(
-        ['git', 'checkout', 'refs/tags/{}'.format(git_tag), '--', path])
+        ['git', 'checkout', git_rev, '--', path])
 
     # Some directories need to be renamed in order for C++ #includes to work
     # correctly.
@@ -65,17 +70,20 @@ def Main():
       required to compile libunwindstack into the libunwindstack/src/
       directory.''')
   parser.add_argument(
-      'git_tag',
-      help='''The git tag for the Android platform/system/core commit that you
-      want to copy the source code from.''')
+      'git_rev',
+      help='''The git revision or tag for the Android platform/system/core
+      commit that you want to copy the source code from.''')
   args = parser.parse_args()
 
   if os.path.exists(_LIBUNWINDSTACK_SRC_ROOT):
     raise IOError('{} should not exist before running this script.'.format(
         _LIBUNWINDSTACK_SRC_ROOT))
 
-  GitFetchTag(args.git_tag)
-  CopyDirsFromUpstream(args.git_tag)
+  if re.search(r'^[0-9a-f]+$', args.git_rev):
+    GitFetchRevision(args.git_rev)
+  else:
+    GitFetchTag(args.git_rev)
+  CopyDirsFromUpstream('FETCH_HEAD')
   return 0
 
 
