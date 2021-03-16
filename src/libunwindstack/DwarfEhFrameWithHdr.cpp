@@ -17,7 +17,6 @@
 #include <stdint.h>
 
 #include <unwindstack/DwarfError.h>
-#include <unwindstack/DwarfSection.h>
 #include <unwindstack/DwarfStructs.h>
 #include <unwindstack/Memory.h>
 
