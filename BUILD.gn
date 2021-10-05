@@ -150,6 +150,8 @@ source_set("libunwindstack") {
   ]
   cflags = [
     "-Wno-c99-designator",
+    "-Wno-shadow",
+    "-Wno-unused-but-set-variable",
   ]
   public_configs = [ ":libunwindstack_config" ]
 }
