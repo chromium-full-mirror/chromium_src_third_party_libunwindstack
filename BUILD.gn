@@ -11,6 +11,14 @@ config("libunwindstack_config") {
   defines = [ "NO_LIBDEXFILE_SUPPORT" ]
 }
 
+config("warnings") {
+  cflags = [
+    "-Wno-c99-designator",
+    "-Wno-shadow",
+    "-Wno-unused-but-set-variable",
+  ]
+}
+
 source_set("libunwindstack") {
   visibility = [
     "//base:native_unwinder_android",
@@ -148,10 +156,6 @@ source_set("libunwindstack") {
   deps = [
     "//third_party/lzma_sdk:lzma_sdk_xz",
   ]
-  cflags = [
-    "-Wno-c99-designator",
-    "-Wno-shadow",
-    "-Wno-unused-but-set-variable",
-  ]
   public_configs = [ ":libunwindstack_config" ]
+  configs = [ ":warnings" ]
 }
