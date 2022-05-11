@@ -129,3 +129,8 @@ Local modifications:
 
   Exposes an interface to create and return a Memory subclass for reading local
   process memory, as a unique_ptr.
+
+- 0008-remove-std-iterator.patch
+
+  Removes all usages of std::iterator, which is deprecated in C++17.
+
