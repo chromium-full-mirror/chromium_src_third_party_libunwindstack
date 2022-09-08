@@ -20,7 +20,6 @@
 #include <sys/mman.h>
 #include <sys/ptrace.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
@@ -91,7 +90,7 @@ static size_t ProcessVmRead(pid_t pid, uint64_t remote_src, void* dst, size_t le
       ++iovecs_used;
     }
 
-    ssize_t rc = syscall(SYS_process_vm_readv, pid, &dst_iov, 1, src_iovs, iovecs_used, 0);
+    ssize_t rc = process_vm_readv(pid, &dst_iov, 1, src_iovs, iovecs_used, 0);
     if (rc == -1) {
       return total_read;
     }

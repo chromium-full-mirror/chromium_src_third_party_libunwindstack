@@ -25,7 +25,6 @@ source_set("libunwindstack") {
   ]
   include_dirs = [
     "//third_party/libunwindstack/src/android-base/include",
-    "//third_party/libunwindstack/src/compat",
     "//third_party/libunwindstack/src/demangle/include",
     "//third_party/libunwindstack/src/liblog/include",
     "//third_party/libunwindstack/src/libprocinfo/include",
@@ -90,8 +89,6 @@ source_set("libunwindstack") {
     "src/android-base/stringprintf.cpp",
     "src/android-base/strings.cpp",
     "src/android-base/threads.cpp",
-    "src/compat/compat/compat.cc",
-    "src/compat/compat/compat.h",
     "src/liblog/include/android/log.h",
     "src/liblog/include/log/log.h",
     "src/liblog/include/log/log_id.h",

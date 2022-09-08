@@ -89,12 +89,15 @@ Steps to update libunwindstack:
 
 Local modifications:
 - Android's base/ directory is renamed android-base/.
-- 0002-disable-ftw.patch:
+- 0001-disable-fdsan.patch:
 
-  The `TemporaryDir` destructor uses the `nftw` function, which isn't available
-  in Android NDK version 16 (it was first made available in 17, as per
-  https://bit.ly/2MSMlt5). `TemporaryDir` is unused by libunwindstack, though,
-  so we safely disable the call.
+  Disables fdsan on unique_fd.h. fdsan isn't available in Android NDK version 16
+  (it was first made available in 29, as per https://bit.ly/2W4II7E).
+
+- 0002-create-local-process-memory.patch:
+
+  Exposes an interface to create and return a Memory subclass for reading local
+  process memory, as a unique_ptr.
 
 - 0003-remove-file-logging.patch:
 
@@ -103,34 +106,7 @@ Local modifications:
   attempts to use BSD's getprogname(), which isn't available in Android NDK
   version 16 (it was first made available in 21, as per https://bit.ly/2nX0nBs).
 
-- 0004-gnu-basename.patch:
-
-  Adds a short implementation of the non-modifying GNU basename() function
-  which isn't available in Android NDK version 16 (it was first made available
-  in 23, as per https://bit.ly/31Gkyl9). We call this function `compat_basename`.
-
-  Although there's a POSIX basename() available via <libgen.h>, that function
-  has different behavior with regards to trailing slashes and can also modify
-  its argument under some circumstances.
-
-- 0005-disable-fdsan.patch:
-
-  Disables fdsan on unique_fd.h. fdsan isn't available in Android NDK version 16
-  (it was first made available in 29, as per https://bit.ly/2W4II7E).
-
-- 0006-memory-process-vm-readv.patch:
-
-  Uses syscall() to call process_vm_readv instead of the process_vm_readv()
-  function, which isn't available in Android NDK 16 (it was first made available
-  in 23, as per https://bit.ly/3412rb7). The syscall() version was already
-  available, as per https://bit.ly/32Tnyvy.
-
-- 0007-create-local-process-memory.patch:
-
-  Exposes an interface to create and return a Memory subclass for reading local
-  process memory, as a unique_ptr.
-
-- 0008-remove-std-iterator.patch
+- 0004-remove-std-iterator.patch
 
   Removes all usages of std::iterator, which is deprecated in C++17.
 
