@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,29 @@
 
 #pragma once
 
-#include <android/log.h>
+#include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace unwindstack {
 
-/*
- * Send a simple string to the log.
- */
-int __android_log_buf_write(int bufID, int prio, const char* tag,
-                            const char* text);
-int __android_log_buf_print(int bufID, int prio, const char* tag, const char* fmt, ...)
-    __attribute__((__format__(printf, 4, 5)));
+enum ArchEnum : uint8_t {
+  ARCH_UNKNOWN = 0,
+  ARCH_ARM,
+  ARCH_ARM64,
+  ARCH_X86,
+  ARCH_X86_64,
+  ARCH_MIPS,
+  ARCH_MIPS64,
+};
 
-/*
- * log_id_t helpers
- */
-log_id_t android_name_to_log_id(const char* logName);
-const char* android_log_id_to_name(log_id_t log_id);
-
-#ifdef __cplusplus
+static inline bool ArchIs32Bit(ArchEnum arch) {
+  switch (arch) {
+    case ARCH_ARM:
+    case ARCH_X86:
+    case ARCH_MIPS:
+      return true;
+    default:
+      return false;
+  }
 }
-#endif
+
+}  // namespace unwindstack

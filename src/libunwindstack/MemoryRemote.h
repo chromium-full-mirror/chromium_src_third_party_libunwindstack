@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef _LIBUNWINDSTACK_MEMORY_REMOTE_H
-#define _LIBUNWINDSTACK_MEMORY_REMOTE_H
+#pragma once
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -32,6 +31,7 @@ class MemoryRemote : public Memory {
   virtual ~MemoryRemote() = default;
 
   size_t Read(uint64_t addr, void* dst, size_t size) override;
+  long ReadTag(uint64_t addr) override;
 
   pid_t pid() { return pid_; }
 
@@ -41,5 +41,3 @@ class MemoryRemote : public Memory {
 };
 
 }  // namespace unwindstack
-
-#endif  // _LIBUNWINDSTACK_MEMORY_REMOTE_H

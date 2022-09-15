@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef _LIBUNWINDSTACK_ELF_INTERFACE_ARM_H
-#define _LIBUNWINDSTACK_ELF_INTERFACE_ARM_H
+#pragma once
 
 #include <elf.h>
 #include <stdint.h>
@@ -33,14 +32,8 @@ class ElfInterfaceArm : public ElfInterface32 {
   ElfInterfaceArm(Memory* memory) : ElfInterface32(memory) {}
   virtual ~ElfInterfaceArm() = default;
 
-  class iterator {
+  class iterator : public std::iterator<std::bidirectional_iterator_tag, uint32_t> {
    public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = uint32_t;
-    using difference_type = std::ptrdiff_t;
-    using pointer = uint32_t*;
-    using reference = uint32_t&;
-
     iterator(ElfInterfaceArm* interface, size_t index) : interface_(interface), index_(index) { }
 
     iterator& operator++() { index_++; return *this; }
@@ -78,11 +71,12 @@ class ElfInterfaceArm : public ElfInterface32 {
 
   void HandleUnknownType(uint32_t type, uint64_t ph_offset, uint64_t ph_filesz) override;
 
-  bool Step(uint64_t pc, Regs* regs, Memory* process_memory, bool* finished) override;
+  bool Step(uint64_t pc, Regs* regs, Memory* process_memory, bool* finished,
+            bool* is_signal_frame) override;
 
   bool StepExidx(uint64_t pc, Regs* regs, Memory* process_memory, bool* finished);
 
-  bool GetFunctionName(uint64_t addr, std::string* name, uint64_t* offset) override;
+  bool GetFunctionName(uint64_t addr, SharedString* name, uint64_t* offset) override;
 
   uint64_t start_offset() { return start_offset_; }
 
@@ -99,5 +93,3 @@ class ElfInterfaceArm : public ElfInterface32 {
 };
 
 }  // namespace unwindstack
-
-#endif  // _LIBUNWINDSTACK_ELF_INTERFACE_ARM_H

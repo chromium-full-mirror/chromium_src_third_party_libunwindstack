@@ -1,8 +1,8 @@
 Name: libunwindstack
-URL: https://android.googlesource.com/platform/system/core
-Revision: a7b4c5d25aebc2c7e6156473dae98238c029e630
-Date: March 31, 2020
-License: Apache 2.0
+URL: https://android.googlesource.com/platform/system/unwinding
+Revision: e9e82f6218611da15f4fc3023dacb5f6ce57f9f8
+Date: Sep 5, 2022
+License: Apache 2.0 and BSD
 License File: LICENSE
 Security Critical: yes
 
@@ -10,7 +10,7 @@ Description:
 Canonical library to unwind Android call stacks.
 
 libunwindstack (and its relevant dependencies) are copied from Android's
-system/core. libunwindstack handles many of the details of unwinding on Android,
+system/unwinding. libunwindstack handles many of the details of unwinding on Android,
 which is inherently more difficult than on other platforms due to the wider
 variety of frame types that occur on Android. These include Java frames, JITted
 Java frames, Chrome C++ frames, and system library C++ frames. Different frame
@@ -23,10 +23,13 @@ libraries from that tree. This is analagous to how a static library that is
 built within the Chromium tree might utilize //base and //threading. For
 libunwindstack, we copy its Android tree dependencies into this directory.
 
-Further complicating matters, Chrome is built against a much older version of
-the Android NDK than this version of libunwindstack, which targets Android tip
-of tree. The local modifications made allow libunwindstack to compile against
-Chrome's older version of the NDK.
+Dependent Android libraries pulled in partially:
+----------------------------------------------------------------------------------------------------------------------------------
+| name        | path under https://android.googlesource.com/platform/system | License | revisions                                |
+| ----------- | ----------------------------------------------------------- | ------- | ---------------------------------------- |
+| libprocinfo | system/libprocinfo/                                         | Apache  | ad9e6cd57e0135be0e76b7d0570141fb4aaf87a3 |
+| libbase     | system/libbase/                                             | Apache  | 55f3f005930249a1031e6aa5ccb84e47f5a84c8b |
+----------------------------------------------------------------------------------------------------------------------------------
 
 Steps to update libunwindstack:
 

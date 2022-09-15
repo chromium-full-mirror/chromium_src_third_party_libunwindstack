@@ -16,6 +16,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/ptrace.h>
@@ -26,12 +27,15 @@
 
 #include <algorithm>
 #include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
 
 #include <android-base/unique_fd.h>
 
+#include <unwindstack/Log.h>
 #include <unwindstack/Memory.h>
 
-#include "Check.h"
 #include "MemoryBuffer.h"
 #include "MemoryCache.h"
 #include "MemoryFileAtOffset.h"
@@ -158,36 +162,43 @@ bool Memory::ReadFully(uint64_t addr, void* dst, size_t size) {
   return rc == size;
 }
 
-bool Memory::ReadString(uint64_t addr, std::string* string, uint64_t max_read) {
-  string->clear();
-  uint64_t bytes_read = 0;
-  while (bytes_read < max_read) {
-    uint8_t value;
-    if (!ReadFully(addr, &value, sizeof(value))) {
-      return false;
+bool Memory::ReadString(uint64_t addr, std::string* dst, size_t max_read) {
+  char buffer[256];  // Large enough for 99% of symbol names.
+  size_t size = 0;   // Number of bytes which were read into the buffer.
+  for (size_t offset = 0; offset < max_read; offset += size) {
+    // Look for null-terminator first, so we can allocate string of exact size.
+    // If we know the end of valid memory range, do the reads in larger blocks.
+    size_t read = std::min(sizeof(buffer), max_read - offset);
+    size = Read(addr + offset, buffer, read);
+    if (size == 0) {
+      return false;  // We have not found end of string yet and we can not read more data.
     }
-    if (value == '\0') {
-      return true;
+    size_t length = strnlen(buffer, size);  // Index of the null-terminator.
+    if (length < size) {
+      // We found the null-terminator. Allocate the string and set its content.
+      if (offset == 0) {
+        // We did just single read, so the buffer already contains the whole string.
+        dst->assign(buffer, length);
+        return true;
+      } else {
+        // The buffer contains only the last block. Read the whole string again.
+        dst->assign(offset + length, '\0');
+        return ReadFully(addr, dst->data(), dst->size());
+      }
     }
-    string->push_back(value);
-    addr++;
-    bytes_read++;
   }
   return false;
 }
 
-std::unique_ptr<Memory> Memory::CreateFileMemory(const std::string& path, uint64_t offset) {
+std::unique_ptr<Memory> Memory::CreateFileMemory(const std::string& path, uint64_t offset,
+                                                 uint64_t size) {
   auto memory = std::make_unique<MemoryFileAtOffset>();
 
-  if (memory->Init(path, offset)) {
+  if (memory->Init(path, offset, size)) {
     return memory;
   }
 
   return nullptr;
-}
-
-std::unique_ptr<Memory> Memory::CreateLocalProcessMemory() {
-  return std::unique_ptr<Memory>(new MemoryLocal());
 }
 
 std::shared_ptr<Memory> Memory::CreateProcessMemory(pid_t pid) {
@@ -202,6 +213,13 @@ std::shared_ptr<Memory> Memory::CreateProcessMemoryCached(pid_t pid) {
     return std::shared_ptr<Memory>(new MemoryCache(new MemoryLocal()));
   }
   return std::shared_ptr<Memory>(new MemoryCache(new MemoryRemote(pid)));
+}
+
+std::shared_ptr<Memory> Memory::CreateProcessMemoryThreadCached(pid_t pid) {
+  if (pid == getpid()) {
+    return std::shared_ptr<Memory>(new MemoryThreadCache(new MemoryLocal()));
+  }
+  return std::shared_ptr<Memory>(new MemoryThreadCache(new MemoryRemote(pid)));
 }
 
 std::shared_ptr<Memory> Memory::CreateOfflineMemory(const uint8_t* data, uint64_t start,
@@ -351,8 +369,21 @@ size_t MemoryRange::Read(uint64_t addr, void* dst, size_t size) {
   return memory_->Read(read_addr, dst, read_length);
 }
 
-void MemoryRanges::Insert(MemoryRange* memory) {
-  maps_.emplace(memory->offset() + memory->length(), memory);
+bool MemoryRanges::Insert(MemoryRange* memory) {
+  uint64_t last_addr;
+  if (__builtin_add_overflow(memory->offset(), memory->length(), &last_addr)) {
+    // This should never happen in the real world. However, it is possible
+    // that an offset in a mapped in segment could be crafted such that
+    // this value overflows. In that case, clamp the value to the max uint64
+    // value.
+    last_addr = UINT64_MAX;
+  }
+  auto entry = maps_.try_emplace(last_addr, memory);
+  if (entry.second) {
+    return true;
+  }
+  delete memory;
+  return false;
 }
 
 size_t MemoryRanges::Read(uint64_t addr, void* dst, size_t size) {
@@ -381,6 +412,16 @@ bool MemoryOffline::Init(const std::string& file, uint64_t offset) {
   }
 
   memory_ = std::make_unique<MemoryRange>(memory_file, sizeof(start), size, start);
+  return true;
+}
+
+bool MemoryOffline::Init(const std::string& file, uint64_t offset, uint64_t start, uint64_t size) {
+  auto memory_file = std::make_shared<MemoryFileAtOffset>();
+  if (!memory_file->Init(file, offset)) {
+    return false;
+  }
+
+  memory_ = std::make_unique<MemoryRange>(memory_file, 0, size, start);
   return true;
 }
 
@@ -433,22 +474,18 @@ size_t MemoryOfflineParts::Read(uint64_t addr, void* dst, size_t size) {
   return 0;
 }
 
-size_t MemoryCache::Read(uint64_t addr, void* dst, size_t size) {
-  // Only bother caching and looking at the cache if this is a small read for now.
-  if (size > 64) {
-    return impl_->Read(addr, dst, size);
-  }
-
+size_t MemoryCacheBase::InternalCachedRead(uint64_t addr, void* dst, size_t size,
+                                           CacheDataType* cache) {
   uint64_t addr_page = addr >> kCacheBits;
-  auto entry = cache_.find(addr_page);
+  auto entry = cache->find(addr_page);
   uint8_t* cache_dst;
-  if (entry != cache_.end()) {
+  if (entry != cache->end()) {
     cache_dst = entry->second;
   } else {
-    cache_dst = cache_[addr_page];
+    cache_dst = (*cache)[addr_page];
     if (!impl_->ReadFully(addr_page << kCacheBits, cache_dst, kCacheSize)) {
       // Erase the entry.
-      cache_.erase(addr_page);
+      cache->erase(addr_page);
       return impl_->Read(addr, dst, size);
     }
   }
@@ -464,19 +501,77 @@ size_t MemoryCache::Read(uint64_t addr, void* dst, size_t size) {
   dst = &reinterpret_cast<uint8_t*>(dst)[max_read];
   addr_page++;
 
-  entry = cache_.find(addr_page);
-  if (entry != cache_.end()) {
+  entry = cache->find(addr_page);
+  if (entry != cache->end()) {
     cache_dst = entry->second;
   } else {
-    cache_dst = cache_[addr_page];
+    cache_dst = (*cache)[addr_page];
     if (!impl_->ReadFully(addr_page << kCacheBits, cache_dst, kCacheSize)) {
       // Erase the entry.
-      cache_.erase(addr_page);
+      cache->erase(addr_page);
       return impl_->Read(addr_page << kCacheBits, dst, size - max_read) + max_read;
     }
   }
   memcpy(dst, cache_dst, size - max_read);
   return size;
+}
+
+void MemoryCache::Clear() {
+  std::lock_guard<std::mutex> lock(cache_lock_);
+  cache_.clear();
+}
+
+size_t MemoryCache::CachedRead(uint64_t addr, void* dst, size_t size) {
+  // Use a single lock since this object is not designed to be performant
+  // for multiple object reading from multiple threads.
+  std::lock_guard<std::mutex> lock(cache_lock_);
+
+  return InternalCachedRead(addr, dst, size, &cache_);
+}
+
+MemoryThreadCache::MemoryThreadCache(Memory* memory) : MemoryCacheBase(memory) {
+  thread_cache_ = std::make_optional<pthread_t>();
+  if (pthread_key_create(&*thread_cache_, [](void* memory) {
+        CacheDataType* cache = reinterpret_cast<CacheDataType*>(memory);
+        delete cache;
+      }) != 0) {
+    Log::AsyncSafe("Failed to create pthread key.");
+    thread_cache_.reset();
+  }
+}
+
+MemoryThreadCache::~MemoryThreadCache() {
+  if (thread_cache_) {
+    CacheDataType* cache = reinterpret_cast<CacheDataType*>(pthread_getspecific(*thread_cache_));
+    delete cache;
+    pthread_key_delete(*thread_cache_);
+  }
+}
+
+size_t MemoryThreadCache::CachedRead(uint64_t addr, void* dst, size_t size) {
+  if (!thread_cache_) {
+    return impl_->Read(addr, dst, size);
+  }
+
+  CacheDataType* cache = reinterpret_cast<CacheDataType*>(pthread_getspecific(*thread_cache_));
+  if (cache == nullptr) {
+    cache = new CacheDataType;
+    pthread_setspecific(*thread_cache_, cache);
+  }
+
+  return InternalCachedRead(addr, dst, size, cache);
+}
+
+void MemoryThreadCache::Clear() {
+  if (!thread_cache_) {
+    return;
+  }
+
+  CacheDataType* cache = reinterpret_cast<CacheDataType*>(pthread_getspecific(*thread_cache_));
+  if (cache != nullptr) {
+    delete cache;
+    pthread_setspecific(*thread_cache_, nullptr);
+  }
 }
 
 }  // namespace unwindstack

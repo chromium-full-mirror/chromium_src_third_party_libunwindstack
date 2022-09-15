@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef _LIBUNWINDSTACK_REGS_ARM64_H
-#define _LIBUNWINDSTACK_REGS_ARM64_H
+#pragma once
 
 #include <stdint.h>
 
@@ -46,6 +45,11 @@ class RegsArm64 : public RegsImpl<uint64_t> {
   uint64_t pc() override;
   uint64_t sp() override;
 
+  void set_pc(uint64_t pc) override;
+  void set_sp(uint64_t sp) override;
+
+  void fallback_pc() override;
+
   void ResetPseudoRegisters() override;
 
   bool SetPseudoRegister(uint16_t id, uint64_t value) override;
@@ -56,20 +60,15 @@ class RegsArm64 : public RegsImpl<uint64_t> {
 
   void SetPACMask(uint64_t mask);
 
-  void set_pc(uint64_t pc) override;
-  void set_sp(uint64_t sp) override;
-
   Regs* Clone() override final;
 
   static Regs* Read(void* data);
 
   static Regs* CreateFromUcontext(void* ucontext);
 
-protected:
+ protected:
   uint64_t pseudo_regs_[Arm64Reg::ARM64_PREG_LAST - Arm64Reg::ARM64_PREG_FIRST];
   uint64_t pac_mask_;
 };
 
 }  // namespace unwindstack
-
-#endif  // _LIBUNWINDSTACK_REGS_ARM64_H
