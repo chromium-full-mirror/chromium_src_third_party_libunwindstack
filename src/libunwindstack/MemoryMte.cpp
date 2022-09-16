@@ -17,7 +17,7 @@
 #include <sys/ptrace.h>
 #include <sys/uio.h>
 
-#if defined(__BIONIC__)
+#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
 #include <bionic/mte.h>
 #else
 #define mte_supported() false

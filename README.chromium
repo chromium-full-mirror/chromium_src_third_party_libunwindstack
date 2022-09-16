@@ -35,10 +35,16 @@ Steps to update libunwindstack:
 
 1. Update the contents to the upstream revision.
 
-   git checkout master && git pull -q
-   git checkout -b update && git cl upstream master
    rm -rf src
-   tools/copy_libunwindstack_sources.py <upstream_git_tag>
+   mkdir temp src
+   git clone https://android.googlesource.com/platform/system/libprocinfo -b master src/libprocinfo
+   git clone https://android.googlesource.com/platform/system/libbase -b master src/android-base
+   git clone https://android.googlesource.com/platform/system/unwinding -b master temp/unwinding
+   cp -pr temp/unwinding/libunwindstack src/libunwindstack
+   # ... get revisions of repositories
+   head {src,temp}/*/.git/refs/heads/master
+   rm -rf src/*/.git temp
+   find src/* -name .clang-format -exec rm \{\} \;
    # ... manually update the revision info in README.chromium ...
    git add --all
    git commit -m 'step 1'
@@ -112,4 +118,20 @@ Local modifications:
 - 0004-remove-std-iterator.patch
 
   Removes all usages of std::iterator, which is deprecated in C++17.
+
+- 0005-dont-include-bionic-headers.patch
+
+  Some bionic headers are not part of NDK even though build flag __BIONIC__ is
+  defined when buliding with NDK. Adds extra check of !defined(__ANDROID_NDK__)
+  to not include those headers.
+
+- 0006-include-algorithm-header.patch
+
+  libunwindstack/DwarfSection.cpp uses std::upper_bound which is declared in
+  <algorithm> header, include header to compile it.
+
+- 0007-stub-out-logging-libunwindstack.patch
+
+  Stub out libunwindstack log methods. It helps to suppress log statements and
+  avoid liblog dependency which the upstream libunwindstack depends on.
 

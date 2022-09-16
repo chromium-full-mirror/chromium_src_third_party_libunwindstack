@@ -45,10 +45,16 @@
 #define OS_PATH_SEPARATOR '/'
 #endif
 
-#include "android-base/logging.h"  // and must be after windows.h for ERROR
 #include "android-base/macros.h"   // For TEMP_FAILURE_RETRY on Darwin.
 #include "android-base/unique_fd.h"
 #include "android-base/utf8.h"
+
+class FakeLog {
+ public:
+  FakeLog operator<<(const char*) { return *this; }
+  operator bool() { return false; }
+};
+#define PLOG(x) false && FakeLog()
 
 namespace {
 

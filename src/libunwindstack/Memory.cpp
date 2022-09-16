@@ -201,6 +201,10 @@ std::unique_ptr<Memory> Memory::CreateFileMemory(const std::string& path, uint64
   return nullptr;
 }
 
+std::unique_ptr<Memory> Memory::CreateLocalProcessMemory() {
+  return std::unique_ptr<Memory>(new MemoryLocal());
+}
+
 std::shared_ptr<Memory> Memory::CreateProcessMemory(pid_t pid) {
   if (pid == getpid()) {
     return std::shared_ptr<Memory>(new MemoryLocal());
