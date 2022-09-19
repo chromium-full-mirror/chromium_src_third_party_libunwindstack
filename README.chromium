@@ -135,3 +135,8 @@ Local modifications:
   Stub out libunwindstack log methods. It helps to suppress log statements and
   avoid liblog dependency which the upstream libunwindstack depends on.
 
+- 0008-remove-extra-semicolon.patch
+
+  Chrome builds with `-Wextra-semi`, redundant semicolons need to be removed to
+  build successfully.
+
