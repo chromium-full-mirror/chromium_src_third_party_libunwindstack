@@ -49,12 +49,20 @@ Steps to update libunwindstack:
    git add --all
    git commit -m 'step 1'
 
-2. Build and apply/update/add patches until the code compiles. Update existing
-   patches so that they apply cleanly. Remove any patches that are no longer
-   required. Assumes out/Debug is configured for an Android component build.
+2. Build and apply/update/add patches until the code compiles with component
+   debug builds. Some linker errors will not be surfaced on release builds
+   as it does aggresive code elimination. Update existing patches so that they
+   apply cleanly. Remove any patches that are no longer required.
 
-   (cd ../.. && autoninja -C out/Debug libstack_unwinder.cr.so)
+   # Apply patches
    patch -p1 < patches/...  # etc.
+   # Build `stack_unwinder` module in component debug build
+   gn gen ../../out/libunwindstack_test_build --args=" \
+     target_os=\"android\" \
+     use_goma=true \
+     is_component_build=true \
+     is_debug=true" && \
+   autoninja -C ../../out/libunwindstack_test_build stack_unwinder
 
    # Remove remnants of failed patch attempts.
    find src -name \*.orig -o -name \*.rej | xargs rm
@@ -64,7 +72,7 @@ Steps to update libunwindstack:
 3. Prune to the subset of libunwindstack sources that should be compiled and
    checked in.
 
-   tools/get_required_sources.sh out/Debug > required_sources
+   tools/get_required_sources.sh out/libunwindstack_test_build > required_sources
 
    # Replace BUILD.gn 'public' files with these:
    grep src/libunwindstack/include required_sources | sed 's/.*/    "&",/'

@@ -85,6 +85,7 @@ source_set("libunwindstack") {
     "src/android-base/include/android-base/threads.h",
     "src/android-base/include/android-base/unique_fd.h",
     "src/android-base/include/android-base/utf8.h",
+    "src/android-base/posix_strerror_r.cpp",
     "src/android-base/stringprintf.cpp",
     "src/android-base/strings.cpp",
     "src/android-base/threads.cpp",
