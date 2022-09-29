@@ -73,6 +73,7 @@ void DexLayoutSections::MadviseAtLoad(const DexFile* dex_file) const {
 #endif
 }
 
+#if 0
 std::ostream& operator<<(std::ostream& os, const DexLayoutSection& section) {
   for (size_t i = 0; i < static_cast<size_t>(LayoutType::kLayoutTypeCount); ++i) {
     const DexLayoutSection::Subsection& part = section.parts_[i];
@@ -88,5 +89,6 @@ std::ostream& operator<<(std::ostream& os, const DexLayoutSections& sections) {
   }
   return os;
 }
+#endif
 
 }  // namespace art

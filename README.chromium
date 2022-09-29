@@ -160,3 +160,23 @@ Local modifications:
   Chrome builds with `-Wextra-semi`, redundant semicolons need to be removed to
   build successfully.
 
+- 0009-disable-thread-annotations.patch
+
+  ART(Android RunTime) builds with `_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS`
+  flag defined. Chromium's libdexfile and libunwindstack builds as part of
+  a single source_set, defining the flag would turn on safety checks for
+  both libunwindstack and libdexfile, libunwindstack upstream doesn't
+  annotate it's code for thread safety so the build errors out when built
+  with the flag.
+
+- 0010-replace-allocator-destroy-construct-calls.patch
+
+  Replace calls to destroy, construct members of allocator, with call to
+  destroy, construct defined in std::allocator_traits<T>
+
+- 0011-dont-compile-unused-functions.patch
+
+  Some unused symbols don't get eliminated for debug builds, explicitly
+  don't compile the unused sections. Required to make component debug builds
+  compile
+

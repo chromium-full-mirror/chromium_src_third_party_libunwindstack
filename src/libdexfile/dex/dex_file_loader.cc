@@ -23,7 +23,9 @@
 #include "dex_file.h"
 #include "dex_file_verifier.h"
 #include "standard_dex_file.h"
+#if 0
 #include "ziparchive/zip_archive.h"
+#endif
 
 namespace art {
 
@@ -58,6 +60,8 @@ class VectorContainer : public DexFileContainer {
 }  // namespace
 
 using android::base::StringPrintf;
+
+#if 0
 
 class DexZipArchive;
 
@@ -148,6 +152,7 @@ static bool IsZipMagic(uint32_t magic) {
   return (('P' == ((magic >> 0) & 0xff)) &&
           ('K' == ((magic >> 8) & 0xff)));
 }
+#endif
 
 bool DexFileLoader::IsMagicValid(uint32_t magic) {
   return IsMagicValid(reinterpret_cast<uint8_t*>(&magic));
@@ -292,6 +297,7 @@ std::unique_ptr<const DexFile> DexFileLoader::OpenWithDataSection(
                     /*verify_result=*/ nullptr);
 }
 
+#if 0
 bool DexFileLoader::OpenAll(
     const uint8_t* base,
     size_t size,
@@ -337,6 +343,7 @@ bool DexFileLoader::OpenAll(
   *error_msg = StringPrintf("Expected valid zip or dex file");
   return false;
 }
+#endif
 
 std::unique_ptr<DexFile> DexFileLoader::OpenCommon(const uint8_t* base,
                                                    size_t size,
@@ -412,6 +419,7 @@ std::unique_ptr<DexFile> DexFileLoader::OpenCommon(const uint8_t* base,
   return dex_file;
 }
 
+#if 0
 std::unique_ptr<const DexFile> DexFileLoader::OpenOneDexFileFromZip(
     const DexZipArchive& zip_archive,
     const char* entry_name,
@@ -472,6 +480,7 @@ std::unique_ptr<const DexFile> DexFileLoader::OpenOneDexFileFromZip(
 // (types, classes, methods, ...) and dex caches. So warn the user that we open a zip with what
 // seems an excessive number.
 static constexpr size_t kWarnOnManyDexFilesThreshold = 100;
+
 
 bool DexFileLoader::OpenAllDexFilesFromZip(
     const DexZipArchive& zip_archive,
@@ -534,4 +543,5 @@ bool DexFileLoader::OpenAllDexFilesFromZip(
     return true;
   }
 }
+#endif
 }  // namespace art

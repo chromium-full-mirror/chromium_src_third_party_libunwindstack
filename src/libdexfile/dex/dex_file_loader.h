@@ -161,6 +161,7 @@ class DexFileLoader {
       std::string* error_msg) const;
 
 
+#if 0
   // Opens all .dex files found in the memory map, guessing the container format based on file
   // extension.
   virtual bool OpenAll(const uint8_t* base,
@@ -171,6 +172,7 @@ class DexFileLoader {
                        DexFileLoaderErrorCode* error_code,
                        std::string* error_msg,
                        std::vector<std::unique_ptr<const DexFile>>* dex_files) const;
+#endif
 
  protected:
   enum class VerifyResult {  // private
