@@ -20,7 +20,7 @@ perl -i -pe 's/-MMD/-MD/' $out_dir/toolchain.ninja
 # `clean` can return a non-zero exit code if targets write files to the output
 # directory that ninja doesn't know about.
 autoninja -C $out_dir -t clean >&2 || true
-autoninja -C $out_dir -d keepdepfile libunwindstack >&2
+autoninja -C $out_dir -d keepdepfile stack_unwinder >&2
 
 # Restore the default deps file behavior.
 gn gen $out_dir >&2

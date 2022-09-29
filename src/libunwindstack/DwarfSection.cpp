@@ -16,8 +16,6 @@
 
 #include <stdint.h>
 
-#include <algorithm>
-
 #include <unwindstack/DwarfError.h>
 #include <unwindstack/DwarfLocation.h>
 #include <unwindstack/DwarfMemory.h>

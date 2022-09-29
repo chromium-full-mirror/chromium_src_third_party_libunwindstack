@@ -1,7 +1,7 @@
 Name: libunwindstack
 URL: https://android.googlesource.com/platform/system/unwinding
-Revision: e9e82f6218611da15f4fc3023dacb5f6ce57f9f8
-Date: Sep 5, 2022
+Revision: 235e2604e2fa3c1f8f7a68c5e285f9622e741e64
+Date: Sep 20, 2022
 License: Apache 2.0 and BSD
 License File: LICENSE
 Security Critical: yes
@@ -23,12 +23,21 @@ libraries from that tree. This is analagous to how a static library that is
 built within the Chromium tree might utilize //base and //threading. For
 libunwindstack, we copy its Android tree dependencies into this directory.
 
+libunwindstack uses libdexfile for symbolizing interpreted java frames on client side,
+doing the same on server side is not trivial at the moment. libdexfile is backwards
+compatible and could parse the dex files for chrome apk built with min-sdk version 23
+and dex version 35. And should be able to handle future min-sdk version bumps, given
+it can currently parse version from 35-40. libdexfile and its dependency libartbase
+comes from platform/art/ repo in AOSP.
+
 Dependent Android libraries pulled in partially:
 ----------------------------------------------------------------------------------------------------------------------------------
-| name        | path under https://android.googlesource.com/platform/system | License | revisions                                |
+| name        | path in Android source code                                 | License | revisions                                |
 | ----------- | ----------------------------------------------------------- | ------- | ---------------------------------------- |
 | libprocinfo | system/libprocinfo/                                         | Apache  | ad9e6cd57e0135be0e76b7d0570141fb4aaf87a3 |
 | libbase     | system/libbase/                                             | Apache  | 55f3f005930249a1031e6aa5ccb84e47f5a84c8b |
+| libdexfile  | art/libdexfile/                                             | Apache  | 754936451408e6dfe23a301f6b638d658cbc5d59 |
+| libartbase  | art/libartbase/                                             | Apache  | 754936451408e6dfe23a301f6b638d658cbc5d59 |
 ----------------------------------------------------------------------------------------------------------------------------------
 
 Steps to update libunwindstack:
@@ -40,7 +49,10 @@ Steps to update libunwindstack:
    git clone https://android.googlesource.com/platform/system/libprocinfo -b master src/libprocinfo
    git clone https://android.googlesource.com/platform/system/libbase -b master src/android-base
    git clone https://android.googlesource.com/platform/system/unwinding -b master temp/unwinding
+   git clone https://android.googlesource.com/platform/art -b master temp/art
    cp -pr temp/unwinding/libunwindstack src/libunwindstack
+   cp -pr temp/art/libdexfile src/libartbase
+   cp -pr temp/art/libartbase src/libunwindstack
    # ... get revisions of repositories
    head {src,temp}/*/.git/refs/heads/master
    rm -rf src/*/.git temp

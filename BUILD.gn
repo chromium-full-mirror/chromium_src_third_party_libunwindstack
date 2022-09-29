@@ -2,13 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+config("libdexfile_defines") {
+  defines = [
+    "DEXFILE_SUPPORT",
+    # To link libdexfile statically, instead of dynamically loading at
+    # runtime as it is done in Android platform.
+    "STATIC_LIB",
+  ]
+}
+
 config("libunwindstack_config") {
   cflags = [
     "-I",
     rebase_path("src/libunwindstack/include", root_build_dir),
   ]
-  # We don't need .dex file support.
-  defines = [ "NO_LIBDEXFILE_SUPPORT" ]
 }
 
 config("warnings") {
@@ -25,6 +32,9 @@ source_set("libunwindstack") {
   ]
   include_dirs = [
     "//third_party/libunwindstack/src/android-base/include",
+    "//third_party/libunwindstack/src/libartbase",
+    "//third_party/libunwindstack/src/libdexfile",
+    "//third_party/libunwindstack/src/libdexfile/external/include",
     "//third_party/libunwindstack/src/libprocinfo/include",
     "//third_party/libunwindstack/src/libunwindstack/include",
   ]
@@ -77,11 +87,16 @@ source_set("libunwindstack") {
   ]
   sources = [
     "src/android-base/file.cpp",
+    "src/android-base/include/android-base/errno_restorer.h",
     "src/android-base/include/android-base/file.h",
+    "src/android-base/include/android-base/logging.h",
     "src/android-base/include/android-base/macros.h",
+    "src/android-base/include/android-base/mapped_file.h",
     "src/android-base/include/android-base/off64_t.h",
+    "src/android-base/include/android-base/parseint.h",
     "src/android-base/include/android-base/stringprintf.h",
     "src/android-base/include/android-base/strings.h",
+    "src/android-base/include/android-base/thread_annotations.h",
     "src/android-base/include/android-base/threads.h",
     "src/android-base/include/android-base/unique_fd.h",
     "src/android-base/include/android-base/utf8.h",
@@ -89,10 +104,89 @@ source_set("libunwindstack") {
     "src/android-base/stringprintf.cpp",
     "src/android-base/strings.cpp",
     "src/android-base/threads.cpp",
+    "src/libartbase/base/bit_utils.h",
+    "src/libartbase/base/casts.h",
+    "src/libartbase/base/data_hash.h",
+    "src/libartbase/base/dumpable.h",
+    "src/libartbase/base/enums.h",
+    "src/libartbase/base/globals.h",
+    "src/libartbase/base/hash_map.h",
+    "src/libartbase/base/hash_set.h",
+    "src/libartbase/base/hiddenapi_domain.h",
+    "src/libartbase/base/hiddenapi_flags.h",
+    "src/libartbase/base/hiddenapi_stubs.h",
+    "src/libartbase/base/iteration_range.h",
+    "src/libartbase/base/leb128.h",
+    "src/libartbase/base/macros.h",
+    "src/libartbase/base/memory_tool.h",
+    "src/libartbase/base/mman.h",
+    "src/libartbase/base/safe_map.h",
+    "src/libartbase/base/sdk_version.h",
+    "src/libartbase/base/stl_util.h",
+    "src/libartbase/base/stl_util_identity.h",
+    "src/libartbase/base/string_view_cpp20.h",
+    "src/libartbase/base/utils.h",
+    "src/libartbase/base/value_object.h",
+    "src/libdexfile/dex/class_accessor.h",
+    "src/libdexfile/dex/class_accessor-inl.h",
+    "src/libdexfile/dex/class_iterator.h",
+    "src/libdexfile/dex/code_item_accessors.h",
+    "src/libdexfile/dex/code_item_accessors-inl.h",
+    "src/libdexfile/dex/compact_dex_file.cc",
+    "src/libdexfile/dex/compact_dex_file.h",
+    "src/libdexfile/dex/compact_dex_utils.h",
+    "src/libdexfile/dex/compact_offset_table.cc",
+    "src/libdexfile/dex/compact_offset_table.h",
+    "src/libdexfile/dex/descriptors_names.cc",
+    "src/libdexfile/dex/descriptors_names.h",
+    "src/libdexfile/dex/dex_file.cc",
+    "src/libdexfile/dex/dex_file_exception_helpers.cc",
+    "src/libdexfile/dex/dex_file_exception_helpers.h",
+    "src/libdexfile/dex/dex_file.h",
+    "src/libdexfile/dex/dex_file-inl.h",
+    "src/libdexfile/dex/dex_file_layout.cc",
+    "src/libdexfile/dex/dex_file_layout.h",
+    "src/libdexfile/dex/dex_file_loader.cc",
+    "src/libdexfile/dex/dex_file_loader.h",
+    "src/libdexfile/dex/dex_file_reference.h",
+    "src/libdexfile/dex/dex_file_structs.h",
+    "src/libdexfile/dex/dex_file_tracking_registrar.cc",
+    "src/libdexfile/dex/dex_file_tracking_registrar.h",
+    "src/libdexfile/dex/dex_file_types.h",
+    "src/libdexfile/dex/dex_file_verifier.cc",
+    "src/libdexfile/dex/dex_file_verifier.h",
+    "src/libdexfile/dex/dex_instruction.cc",
+    "src/libdexfile/dex/dex_instruction.h",
+    "src/libdexfile/dex/dex_instruction-inl.h",
+    "src/libdexfile/dex/dex_instruction_iterator.h",
+    "src/libdexfile/dex/dex_instruction_list.h",
+    "src/libdexfile/dex/invoke_type.h",
+    "src/libdexfile/dex/method_reference.h",
+    "src/libdexfile/dex/modifiers.cc",
+    "src/libdexfile/dex/modifiers.h",
+    "src/libdexfile/dex/primitive.cc",
+    "src/libdexfile/dex/primitive.h",
+    "src/libdexfile/dex/signature.cc",
+    "src/libdexfile/dex/signature.h",
+    "src/libdexfile/dex/signature-inl.h",
+    "src/libdexfile/dex/standard_dex_file.cc",
+    "src/libdexfile/dex/standard_dex_file.h",
+    "src/libdexfile/dex/type_lookup_table.cc",
+    "src/libdexfile/dex/type_lookup_table.h",
+    "src/libdexfile/dex/utf.cc",
+    "src/libdexfile/dex/utf.h",
+    "src/libdexfile/dex/utf-inl.h",
+    "src/libdexfile/external/dex_file_ext.cc",
+    "src/libdexfile/external/dex_file_supp.cc",
+    "src/libdexfile/external/include/art_api/dex_file_external.h",
+    "src/libdexfile/external/include/art_api/dex_file_support.h",
     "src/libprocinfo/include/procinfo/process_map.h",
     "src/libunwindstack/ArmExidx.cpp",
     "src/libunwindstack/ArmExidx.h",
     "src/libunwindstack/Check.h",
+    "src/libunwindstack/DexFile.cpp",
+    "src/libunwindstack/DexFile.h",
+    "src/libunwindstack/DexFiles.cpp",
     "src/libunwindstack/DwarfCfa.cpp",
     "src/libunwindstack/DwarfCfa.h",
     "src/libunwindstack/DwarfDebugFrame.h",
@@ -146,7 +240,11 @@ source_set("libunwindstack") {
   }
   deps = [
     "//third_party/lzma_sdk:lzma_sdk_xz",
+    "//third_party/zlib:zlib",
   ]
   public_configs = [ ":libunwindstack_config" ]
-  configs += [ ":warnings" ]
+  configs += [
+    ":libdexfile_defines",
+    ":warnings",
+  ]
 }
