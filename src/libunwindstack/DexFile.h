@@ -74,8 +74,6 @@ class DexFile {
   // Therefore, we maintain cache to avoid loading the same file (sub-range) many times.
   // The cache is weak: It will not keep DexFiles alive (the weak_ptr will become null).
   using MappedFileKey = std::tuple<std::string, uint64_t, uint64_t>;  // (path, offset, size).
-  static std::map<MappedFileKey, std::weak_ptr<DexFileApi>> g_mapped_dex_files;
-  static std::mutex g_lock;  // Guards the static cache above.
 };
 
 }  // namespace unwindstack

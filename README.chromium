@@ -180,3 +180,11 @@ Local modifications:
   don't compile the unused sections. Required to make component debug builds
   compile
 
+- 0012-remove-class-static-variables.patch
+
+  Chrome bans static initializers:
+  https://chromium.googlesource.com/chromium/src.git/+/HEAD/docs/static_initializers.md
+  This patch moves class static variables to function static variables so
+  they can be initialized on first use instead of being initialzed at
+  app launch.
+
