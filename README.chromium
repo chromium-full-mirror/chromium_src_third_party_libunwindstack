@@ -188,3 +188,7 @@ Local modifications:
   they can be initialized on first use instead of being initialzed at
   app launch.
 
+- 0013-do-not-redefine-ADDRESS_SANITIZER.patch
+
+  Do not redefine ADDRESS_SANITIZER macro as the chromium ASAN build already defines it.
+
