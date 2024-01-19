@@ -292,9 +292,9 @@ struct FilterIterator {
   std::optional<RealIter> end_;
 };
 
-template <typename Iter, typename Filter>
-static inline IterationRange<FilterIterator<Iter, Filter>> Filter(
-    IterationRange<Iter> it, Filter cond) {
+template <typename Iter, typename FilterT>
+static inline IterationRange<FilterIterator<Iter, FilterT>> Filter(
+    IterationRange<Iter> it, FilterT cond) {
   auto end = it.end();
   auto start = std::find_if(it.begin(), end, cond);
   return MakeIterationRange(FilterIterator(start, cond, std::make_optional(end)),

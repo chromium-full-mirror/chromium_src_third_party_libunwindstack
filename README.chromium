@@ -196,3 +196,9 @@ Local modifications:
 
   Patches to fix the compile in -std=c++20 mode. These have been landed
   upstream, so this patch can be removed at the next roll.
+
+- 0015-stl_util_filter.patch
+
+  Fix 'Filter' function shadowing its own template parameter, which recent Clang
+  versions treat as an error. The patch has been sent upstream as
+  https://android-review.git.corp.google.com/c/platform/art/+/2919786
