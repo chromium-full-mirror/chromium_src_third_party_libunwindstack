@@ -1,7 +1,7 @@
 Name: libunwindstack
 URL: https://android.googlesource.com/platform/system/unwinding
-Revision: 235e2604e2fa3c1f8f7a68c5e285f9622e741e64
-Date: Sep 20, 2022
+Revision: 9ebb4981c2b9ba73018702531ded8de9c169958a
+Date: Jan 29, 2023
 License: Apache 2.0 and BSD
 License File: LICENSE
 Security Critical: yes
@@ -34,10 +34,10 @@ Dependent Android libraries pulled in partially:
 ----------------------------------------------------------------------------------------------------------------------------------
 | name        | path in Android source code                                 | License | revisions                                |
 | ----------- | ----------------------------------------------------------- | ------- | ---------------------------------------- |
-| libprocinfo | system/libprocinfo/                                         | Apache  | ad9e6cd57e0135be0e76b7d0570141fb4aaf87a3 |
-| libbase     | system/libbase/                                             | Apache  | 55f3f005930249a1031e6aa5ccb84e47f5a84c8b |
-| libdexfile  | art/libdexfile/                                             | Apache  | 754936451408e6dfe23a301f6b638d658cbc5d59 |
-| libartbase  | art/libartbase/                                             | Apache  | 754936451408e6dfe23a301f6b638d658cbc5d59 |
+| libartbase  | art/libartbase/                                             | Apache  | ddd4776acaa0a4fb0e6027cd063ec450f518c7d7 |
+| libbase     | system/libbase/                                             | Apache  | a5c86f3574f744b22a82a8cd08e7fa0bf7210c28 |
+| libdexfile  | art/libdexfile/                                             | Apache  | ddd4776acaa0a4fb0e6027cd063ec450f518c7d7 |
+| libprocinfo | system/libprocinfo/                                         | Apache  | 295ed0246f153f155b975acee119d7e3adecadec |
 ----------------------------------------------------------------------------------------------------------------------------------
 
 Steps to update libunwindstack:
@@ -51,8 +51,8 @@ Steps to update libunwindstack:
    git clone https://android.googlesource.com/platform/system/unwinding -b master temp/unwinding
    git clone https://android.googlesource.com/platform/art -b master temp/art
    cp -pr temp/unwinding/libunwindstack src/libunwindstack
-   cp -pr temp/art/libdexfile src/libartbase
-   cp -pr temp/art/libartbase src/libunwindstack
+   cp -pr temp/art/libdexfile src/libdexfile
+   cp -pr temp/art/libartbase src/libartbase
    # ... get revisions of repositories
    head {src,temp}/*/.git/refs/heads/master
    rm -rf src/*/.git temp

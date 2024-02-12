@@ -45,9 +45,9 @@ class ClassIterator {
  public:
   using iterator_category = std::forward_iterator_tag;
   using value_type = ClassIteratorData;
-  using difference_type = std::ptrdiff_t;
-  using pointer = ClassIteratorData*;
-  using reference = ClassIteratorData&;
+  using difference_type = ptrdiff_t;
+  using pointer = void;
+  using reference = void;
 
   ClassIterator(const DexFile& dex_file, uint32_t class_def_idx)
       : data_(dex_file, class_def_idx) {}

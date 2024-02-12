@@ -28,7 +28,7 @@ namespace art {
 #if __has_feature(address_sanitizer)
 
 # include <sanitizer/asan_interface.h>
-//# define ADDRESS_SANITIZER
+# define ADDRESS_SANITIZER
 
 # ifdef ART_ENABLE_ADDRESS_SANITIZER
 #  define MEMORY_TOOL_MAKE_NOACCESS(p, s) __asan_poison_memory_region(p, s)
@@ -74,17 +74,6 @@ constexpr size_t kMemoryToolStackGuardSizeScale = 1;
 #else
 # define ATTRIBUTE_NO_SANITIZE_HWADDRESS
 #endif
-
-// Removes the hwasan tag from the pointer (the top eight bits).
-// Those bits are used for verification by hwasan and they are ignored by normal ARM memory ops.
-template<typename PtrType>
-static inline PtrType* HWASanUntag(PtrType* p) {
-#if __has_feature(hwaddress_sanitizer) && defined(__aarch64__)
-  return reinterpret_cast<PtrType*>(reinterpret_cast<uintptr_t>(p) & ((1ULL << 56) - 1));
-#else
-  return p;
-#endif
-}
 
 }  // namespace art
 

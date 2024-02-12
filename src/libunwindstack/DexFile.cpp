@@ -34,6 +34,9 @@
 
 namespace unwindstack {
 
+std::map<DexFile::MappedFileKey, std::weak_ptr<DexFile::DexFileApi>> DexFile::g_mapped_dex_files;
+std::mutex DexFile::g_lock;
+
 static bool CheckDexSupport() {
   if (std::string err_msg; !art_api::dex::TryLoadLibdexfile(&err_msg)) {
     Log::Error("Failed to initialize DEX file support: %s", err_msg.c_str());
@@ -43,9 +46,6 @@ static bool CheckDexSupport() {
 }
 
 std::shared_ptr<DexFile> DexFile::CreateFromDisk(uint64_t addr, uint64_t size, MapInfo* map) {
-  static auto& mapped_dex_files = *new std::map<MappedFileKey, std::weak_ptr<DexFileApi>>;
-  static auto& lock = *new std::mutex;  // Guards the static cache above.
-
   if (map == nullptr || map->name().empty()) {
     return nullptr;  // MapInfo not backed by file.
   }
@@ -58,16 +58,16 @@ std::shared_ptr<DexFile> DexFile::CreateFromDisk(uint64_t addr, uint64_t size, M
   uint64_t offset_in_file = (addr - map->start()) + map->offset();
 
   // Fast-path: Check if the dex file was already mapped from disk.
-  std::lock_guard<std::mutex> guard(lock);
+  std::lock_guard<std::mutex> guard(g_lock);
   MappedFileKey cache_key(map->name(), offset_in_file, size);
-  std::weak_ptr<DexFileApi>& cache_entry = mapped_dex_files[cache_key];
+  std::weak_ptr<DexFileApi>& cache_entry = g_mapped_dex_files[cache_key];
   std::shared_ptr<DexFileApi> dex_api = cache_entry.lock();
   if (dex_api != nullptr) {
     return std::shared_ptr<DexFile>(new DexFile(addr, size, std::move(dex_api)));
   }
 
   // Load the file from disk and cache it.
-  std::unique_ptr<Memory> memory = Memory::CreateFileMemory(map->name(), offset_in_file, size);
+  auto memory = Memory::CreateFileMemory(map->name(), offset_in_file, size);
   if (memory == nullptr) {
     return nullptr;  // failed to map the file.
   }
@@ -76,7 +76,7 @@ std::shared_ptr<DexFile> DexFile::CreateFromDisk(uint64_t addr, uint64_t size, M
   if (dex == nullptr) {
     return nullptr;  // invalid DEX file.
   }
-  dex_api.reset(new DexFileApi{std::move(dex), std::move(memory), std::mutex()});
+  dex_api.reset(new DexFileApi{std::move(dex), memory, std::mutex()});
   cache_entry = dex_api;
   return std::shared_ptr<DexFile>(new DexFile(addr, size, std::move(dex_api)));
 }
@@ -108,11 +108,9 @@ std::shared_ptr<DexFile> DexFile::Create(uint64_t base_addr, uint64_t file_size,
   }
 
   // Fallback: make copy in local buffer.
-  std::unique_ptr<MemoryBuffer> copy(new MemoryBuffer);
-  if (!copy->Resize(file_size)) {
-    return nullptr;
-  }
-  if (!memory->ReadFully(base_addr, copy->GetPtr(0), file_size)) {
+  std::unique_ptr<MemoryBuffer> copy(new MemoryBuffer(file_size));
+  uint8_t* dst_ptr = copy->GetPtr(0);
+  if (dst_ptr == nullptr || !memory->ReadFully(base_addr, dst_ptr, file_size)) {
     return nullptr;
   }
   std::unique_ptr<art_api::dex::DexFile> dex;

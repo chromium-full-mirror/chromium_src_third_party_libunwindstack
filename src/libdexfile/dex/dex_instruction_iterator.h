@@ -61,9 +61,9 @@ class DexInstructionIteratorBase {
  public:
   using iterator_category = std::forward_iterator_tag;
   using value_type = DexInstructionPcPair;
-  using difference_type = std::ptrdiff_t;
-  using pointer = DexInstructionPcPair*;
-  using reference = DexInstructionPcPair&;
+  using difference_type = ptrdiff_t;
+  using pointer = void;
+  using reference = void;
 
   explicit DexInstructionIteratorBase(const Instruction* inst, uint32_t dex_pc)
       : data_(reinterpret_cast<const uint16_t*>(inst), dex_pc) {}

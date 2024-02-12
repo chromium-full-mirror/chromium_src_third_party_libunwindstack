@@ -47,17 +47,20 @@
 #define ACQUIRED_AFTER(...) \
       THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
 
-#define REQUIRES(...)
+#define REQUIRES(...) \
+      THREAD_ANNOTATION_ATTRIBUTE__(requires_capability(__VA_ARGS__))
 
 #define REQUIRES_SHARED(...) \
       THREAD_ANNOTATION_ATTRIBUTE__(requires_shared_capability(__VA_ARGS__))
 
-#define ACQUIRE(...)
+#define ACQUIRE(...) \
+      THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
 
 #define ACQUIRE_SHARED(...) \
       THREAD_ANNOTATION_ATTRIBUTE__(acquire_shared_capability(__VA_ARGS__))
 
-#define RELEASE(...)
+#define RELEASE(...) \
+      THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
 
 #define RELEASE_SHARED(...) \
       THREAD_ANNOTATION_ATTRIBUTE__(release_shared_capability(__VA_ARGS__))
@@ -77,7 +80,8 @@
 #define ASSERT_SHARED_CAPABILITY(x) \
       THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_capability(x))
 
-#define RETURN_CAPABILITY(x)
+#define RETURN_CAPABILITY(x) \
+      THREAD_ANNOTATION_ATTRIBUTE__(lock_returned(x))
 
 #define EXCLUSIVE_LOCK_FUNCTION(...) \
       THREAD_ANNOTATION_ATTRIBUTE__(exclusive_lock_function(__VA_ARGS__))

@@ -218,13 +218,7 @@ struct LogAbortAfterFullExpr {
 // FATAL it also causes an abort. For example:
 //
 //     LOG(FATAL) << "We didn't expect to reach here";
-class FakeLog {
- public:
-  template<typename T>
-  FakeLog operator<<(const T&) { return *this; }
-  operator bool() { return false; }
-};
-#define LOG(severity) false && ::android::base::FakeLog()
+#define LOG(severity) LOGGING_PREAMBLE(severity) && LOG_STREAM(severity)
 
 // Checks if we want to log something, and sets up appropriate RAII objects if
 // so.
@@ -236,7 +230,11 @@ class FakeLog {
 
 // A variant of LOG that also logs the current errno value. To be used when
 // library calls fail.
-#define PLOG(severity) false && ::android::base::FakeLog()
+#define PLOG(severity)                                                           \
+  LOGGING_PREAMBLE(severity) &&                                                  \
+      ::android::base::LogMessage(__FILE__, __LINE__, SEVERITY_LAMBDA(severity), \
+                                  _LOG_TAG_INTERNAL, errno)                      \
+          .stream()
 
 // Marker that code is yet to be implemented.
 #define UNIMPLEMENTED(level) \
@@ -250,7 +248,9 @@ class FakeLog {
 //       "Check failed: false == true".
 #define CHECK(x)                                                                                 \
   LIKELY((x)) || ABORT_AFTER_LOG_FATAL_EXPR(false) ||                                            \
-      ::android::base::FakeLog()                                                                 \
+      ::android::base::LogMessage(__FILE__, __LINE__, ::android::base::FATAL, _LOG_TAG_INTERNAL, \
+                                  -1)                                                            \
+              .stream()                                                                          \
           << "Check failed: " #x << " "
 
 // clang-format off
@@ -260,7 +260,8 @@ class FakeLog {
        UNLIKELY(!(_values.lhs.v OP _values.rhs.v));                                              \
        /* empty */)                                                                              \
   ABORT_AFTER_LOG_FATAL                                                                          \
-  ::android::base::FakeLog()                                                                     \
+  ::android::base::LogMessage(__FILE__, __LINE__, ::android::base::FATAL, _LOG_TAG_INTERNAL, -1) \
+          .stream()                                                                              \
       << "Check failed: " << #LHS << " " << #OP << " " << #RHS << " (" #LHS "="                  \
       << ::android::base::LogNullGuard<decltype(_values.lhs.v)>::Guard(_values.lhs.v)            \
       << ", " #RHS "="                                                                           \

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,13 +30,8 @@
 
 namespace unwindstack {
 
-enum Mips32UserReg : uint16_t {
-  MIPS32_EF_R0 = 6,
-  MIPS32_EF_CP0_EPC = 40,
-};
-
-struct mips_user_regs {
-  uint32_t regs[45];
+struct riscv64_user_regs {
+  uint64_t regs[32];
 };
 
 }  // namespace unwindstack

@@ -160,9 +160,9 @@ class ZipLeftIter {
  public:
   using iterator_category = std::forward_iterator_tag;
   using value_type = std::pair<typename IterLeft::value_type, typename IterRight::value_type>;
-  using difference_type = std::ptrdiff_t;
-  using pointer = std::pair<typename IterLeft::value_type, typename IterRight::value_type>*;
-  using reference = std::pair<typename IterLeft::value_type, typename IterRight::value_type>&;
+  using difference_type = ptrdiff_t;
+  using pointer = void;
+  using reference = void;
 
   ZipLeftIter(IterLeft left, IterRight right) : left_iter_(left), right_iter_(right) {}
   ZipLeftIter<IterLeft, IterRight>& operator++() {
@@ -195,8 +195,9 @@ class CountIter {
   using iterator_category = std::forward_iterator_tag;
   using value_type = size_t;
   using difference_type = size_t;
-  using pointer = size_t;
-  using reference = size_t;
+  using pointer = void;
+  using reference = void;
+
   CountIter() : count_(0) {}
   explicit CountIter(size_t count) : count_(count) {}
   CountIter& operator++() {
@@ -250,10 +251,10 @@ template <typename RealIter, typename Filter>
 struct FilterIterator {
  public:
   using iterator_category = std::forward_iterator_tag;
-  using value_type = typename RealIter::value_type;
-  using difference_type = std::ptrdiff_t;
-  using pointer = typename RealIter::value_type*;
-  using reference = typename RealIter::value_type&;
+  using value_type = typename std::iterator_traits<RealIter>::value_type;
+  using difference_type = ptrdiff_t;
+  using pointer = typename std::iterator_traits<RealIter>::pointer;
+  using reference = typename std::iterator_traits<RealIter>::reference;
 
   FilterIterator(RealIter rl,
                  Filter cond,
@@ -292,11 +293,10 @@ struct FilterIterator {
   std::optional<RealIter> end_;
 };
 
-template <typename Iter, typename FilterT>
-static inline IterationRange<FilterIterator<Iter, FilterT>> Filter(
-    IterationRange<Iter> it, FilterT cond) {
-  auto end = it.end();
-  auto start = std::find_if(it.begin(), end, cond);
+template <typename BaseRange, typename FilterT>
+static inline auto Filter(BaseRange&& range, FilterT cond) {
+  auto end = range.end();
+  auto start = std::find_if(range.begin(), end, cond);
   return MakeIterationRange(FilterIterator(start, cond, std::make_optional(end)),
                             FilterIterator(end, cond, std::make_optional(end)));
 }
@@ -342,9 +342,9 @@ struct SplitStringIter {
  public:
   using iterator_category = std::forward_iterator_tag;
   using value_type = std::string_view;
-  using difference_type = std::ptrdiff_t;
-  using pointer = std::string_view*;
-  using reference = std::string_view&;
+  using difference_type = ptrdiff_t;
+  using pointer = void;
+  using reference = void;
 
   // Direct iterator constructor. The iteration state is only the current index.
   // We use that with the split char and the full string to get the current and

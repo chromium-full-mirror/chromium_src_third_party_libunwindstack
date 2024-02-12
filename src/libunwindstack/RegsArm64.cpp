@@ -19,7 +19,7 @@
 
 #include <functional>
 
-#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
+#if defined(__BIONIC__)
 #include <bionic/pac.h>
 #endif
 
@@ -60,7 +60,7 @@ static uint64_t strip_pac(uint64_t pc, uint64_t mask) {
   if (mask) {
     pc &= ~mask;
   } else {
-#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
+#if defined(__BIONIC__)
     pc = __bionic_clear_pac_bits(pc);
 #endif
   }
@@ -152,11 +152,10 @@ Regs* RegsArm64::CreateFromUcontext(void* ucontext) {
 }
 
 bool RegsArm64::StepIfSignalHandler(uint64_t elf_offset, Elf* elf, Memory* process_memory) {
-  uint64_t data;
-  Memory* elf_memory = elf->memory();
   // Read from elf memory since it is usually more expensive to read from
   // process memory.
-  if (!elf_memory->ReadFully(elf_offset, &data, sizeof(data))) {
+  uint64_t data;
+  if (!elf->memory()->ReadFully(elf_offset, &data, sizeof(data))) {
     return false;
   }
 

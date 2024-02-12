@@ -139,6 +139,17 @@ class DefaultEmptyFn<T*> {
   }
 };
 
+template <>
+class DefaultEmptyFn<std::string> {
+ public:
+  void MakeEmpty(std::string& item) const {
+    item = std::string();
+  }
+  bool IsEmpty(const std::string& item) const {
+    return item.empty();
+  }
+};
+
 template <class T>
 using DefaultHashFn = std::conditional_t<std::is_same_v<T, std::string>, DataHash, std::hash<T>>;
 
@@ -491,10 +502,10 @@ class HashSet {
   // Insert an element with hint.
   // Note: The hint is not very useful for a HashSet<> unless there are many hash conflicts
   // and in that case the use of HashSet<> itself should be reconsidered.
-  std::pair<iterator, bool> insert(const_iterator hint ATTRIBUTE_UNUSED, const T& element) {
+  std::pair<iterator, bool> insert([[maybe_unused]] const_iterator hint, const T& element) {
     return insert(element);
   }
-  std::pair<iterator, bool> insert(const_iterator hint ATTRIBUTE_UNUSED, T&& element) {
+  std::pair<iterator, bool> insert([[maybe_unused]] const_iterator hint, T&& element) {
     return insert(std::move(element));
   }
 
@@ -699,7 +710,7 @@ class HashSet {
     if (UNLIKELY(NumBuckets() == 0)) {
       return 0;
     }
-    auto fail_fn = [&](size_t index ATTRIBUTE_UNUSED) ALWAYS_INLINE { return NumBuckets(); };
+    auto fail_fn = [&]([[maybe_unused]] size_t index) ALWAYS_INLINE { return NumBuckets(); };
     return FindIndexImpl(element, hash, fail_fn);
   }
 
@@ -734,7 +745,7 @@ class HashSet {
     data_ = allocfn_.allocate(num_buckets_);
     owns_data_ = true;
     for (size_t i = 0; i < num_buckets_; ++i) {
-      std::allocator_traits<Alloc>::construct(allocfn_, std::addressof(data_[i]));
+      allocfn_.construct(allocfn_.address(data_[i]));
       emptyfn_.MakeEmpty(data_[i]);
     }
   }
@@ -742,7 +753,7 @@ class HashSet {
   void DeallocateStorage() {
     if (owns_data_) {
       for (size_t i = 0; i < NumBuckets(); ++i) {
-        std::allocator_traits<Alloc>::destroy(allocfn_, std::addressof(data_[i]));
+        allocfn_.destroy(allocfn_.address(data_[i]));
       }
       if (data_ != nullptr) {
         allocfn_.deallocate(data_, NumBuckets());
@@ -777,7 +788,7 @@ class HashSet {
         data_[FirstAvailableSlot(IndexForHash(hashfn_(element)))] = std::move(element);
       }
       if (owned_data) {
-        std::allocator_traits<Alloc>::destroy(allocfn_, std::addressof(element));
+        allocfn_.destroy(allocfn_.address(element));
       }
     }
     if (owned_data) {

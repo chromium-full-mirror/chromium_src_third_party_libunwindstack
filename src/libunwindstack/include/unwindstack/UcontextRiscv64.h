@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,13 +30,55 @@
 
 namespace unwindstack {
 
-enum Mips64UserReg : uint16_t {
-  MIPS64_EF_R0 = 0,
-  MIPS64_EF_CP0_EPC = 34,
+#include <sys/cdefs.h>
+
+typedef uint64_t __riscv_mc_gp_state[32];  // unsigned long
+
+struct __riscv_mc_f_ext_state {
+  uint32_t __f[32];
+  uint32_t __fcsr;
 };
 
-struct mips64_user_regs {
-  uint64_t regs[45];
+struct __riscv_mc_d_ext_state {
+  uint64_t __f[32];
+  uint32_t __fcsr;
+};
+
+struct __riscv_mc_q_ext_state {
+  uint64_t __f[64] __attribute__((__aligned__(16)));
+  uint32_t __fcsr;
+  uint32_t __reserved[3];
+};
+
+union __riscv_mc_fp_state {
+  struct __riscv_mc_f_ext_state __f;
+  struct __riscv_mc_d_ext_state __d;
+  struct __riscv_mc_q_ext_state __q;
+};
+
+struct __riscv_stack_t {
+  uint64_t ss_sp;
+  int32_t ss_flags;
+  uint64_t ss_size;
+};
+
+struct riscv64_sigset_t {
+  uint64_t sig;  // unsigned long
+};
+
+struct riscv64_mcontext_t {
+  __riscv_mc_gp_state __gregs;
+  union __riscv_mc_fp_state __fpregs;
+};
+
+struct riscv64_ucontext_t {
+  uint64_t uc_flags;  // unsigned long
+  struct riscv64_ucontext_t* uc_link;
+  __riscv_stack_t uc_stack;
+  riscv64_sigset_t uc_sigmask;
+  /* The kernel adds extra padding here to allow sigset_t to grow. */
+  int8_t __padding[128 - sizeof(riscv64_sigset_t)];  // char
+  riscv64_mcontext_t uc_mcontext;
 };
 
 }  // namespace unwindstack
