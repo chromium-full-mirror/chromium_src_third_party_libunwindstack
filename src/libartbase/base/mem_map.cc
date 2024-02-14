@@ -169,7 +169,6 @@ bool MemMap::ContainedWithinExistingMap(uint8_t* ptr, size_t size, std::string* 
   }
 
   if (error_msg != nullptr) {
-    PrintFileToLog("/proc/self/maps", LogSeverity::ERROR);
     *error_msg = StringPrintf("Requested region 0x%08" PRIxPTR "-0x%08" PRIxPTR " does not overlap "
                               "any existing map. See process maps in the log.", begin, end);
   }
@@ -215,11 +214,6 @@ bool MemMap::CheckMapRequest(uint8_t* expected_ptr, void* actual_ptr, size_t byt
     //   true, even if there is no overlap
     // - There might have been an overlap at the point of mmap, but the
     //   overlapping region has since been unmapped.
-
-    // Tell the client the mappings that were in place at the time.
-    if (kIsDebugBuild) {
-      PrintFileToLog("/proc/self/maps", LogSeverity::WARNING);
-    }
 
     std::ostringstream os;
     os <<  StringPrintf("Failed to mmap at expected address, mapped at "
@@ -355,7 +349,6 @@ MemMap MemMap::MapAnonymous(const char* name,
 
   if (actual == MAP_FAILED) {
     if (error_msg != nullptr) {
-      PrintFileToLog("/proc/self/maps", LogSeverity::WARNING);
       *error_msg = StringPrintf("Failed anonymous mmap(%p, %zd, 0x%x, 0x%x, %d, 0): %s. "
                                     "See process maps in the log.",
                                 addr,
@@ -576,10 +569,6 @@ MemMap MemMap::MapFileAtAddress(uint8_t* expected_ptr,
     if (error_msg != nullptr) {
       auto saved_errno = errno;
 
-      if (kIsDebugBuild || VLOG_IS_ON(oat)) {
-        PrintFileToLog("/proc/self/maps", LogSeverity::WARNING);
-      }
-
       *error_msg = StringPrintf("mmap(%p, %zd, 0x%x, 0x%x, %d, %" PRId64
                                 ") of file '%s' failed: %s. See process maps in the log.",
                                 page_aligned_expected, page_aligned_byte_count, prot, flags, fd,
@@ -790,7 +779,6 @@ MemMap MemMap::RemapAtEnd(uint8_t* new_end,
     *error_msg = StringPrintf("map(%p, %zd, 0x%x, 0x%x, %d, 0) failed: %s. See process "
                               "maps in the log.", tail_base_begin, tail_base_size, tail_prot, flags,
                               fd, strerror(errno));
-    PrintFileToLog("/proc/self/maps", LogSeverity::WARNING);
     return Invalid();
   }
   // Update *this.

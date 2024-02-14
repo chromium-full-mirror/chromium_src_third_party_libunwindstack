@@ -1,8 +1,18 @@
 diff --git a/src/android-base/include/android-base/thread_annotations.h b/src/android-base/include/android-base/thread_annotations.h
-index 53fe6da..95d3c7c 100644
+index 53fe6da..336c19f 100644
 --- a/src/android-base/include/android-base/thread_annotations.h
 +++ b/src/android-base/include/android-base/thread_annotations.h
-@@ -47,20 +47,17 @@
+@@ -29,8 +29,7 @@
+ #define SHARED_CAPABILITY(...) \
+       THREAD_ANNOTATION_ATTRIBUTE__(shared_capability(__VA_ARGS__))
+ 
+-#define GUARDED_BY(x) \
+-      THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
++#define GUARDED_BY(x)
+ 
+ #define PT_GUARDED_BY(x) \
+       THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
+@@ -47,20 +46,17 @@
  #define ACQUIRED_AFTER(...) \
        THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
  
@@ -26,7 +36,7 @@ index 53fe6da..95d3c7c 100644
  
  #define RELEASE_SHARED(...) \
        THREAD_ANNOTATION_ATTRIBUTE__(release_shared_capability(__VA_ARGS__))
-@@ -80,8 +77,7 @@
+@@ -80,8 +76,7 @@
  #define ASSERT_SHARED_CAPABILITY(x) \
        THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_capability(x))
  

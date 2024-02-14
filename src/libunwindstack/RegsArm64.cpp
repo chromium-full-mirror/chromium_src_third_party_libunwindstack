@@ -19,7 +19,7 @@
 
 #include <functional>
 
-#if defined(__BIONIC__)
+#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
 #include <bionic/pac.h>
 #endif
 
@@ -60,7 +60,7 @@ static uint64_t strip_pac(uint64_t pc, uint64_t mask) {
   if (mask) {
     pc &= ~mask;
   } else {
-#if defined(__BIONIC__)
+#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
     pc = __bionic_clear_pac_bits(pc);
 #endif
   }

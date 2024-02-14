@@ -1,25 +1,3 @@
-diff --git a/src/libunwindstack/LogAndroid.cpp b/src/libunwindstack/LogAndroid.cpp
-index a2bfc39..bb8fdaf 100644
---- a/src/libunwindstack/LogAndroid.cpp
-+++ b/src/libunwindstack/LogAndroid.cpp
-@@ -23,7 +23,7 @@
- #define LOG_TAG "unwind"
- #include <log/log.h>
- 
--#if defined(__BIONIC__)
-+#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
- #include <async_safe/log.h>
- #endif
- #include <android-base/stringprintf.h>
-@@ -66,7 +66,7 @@ void Error(const char* format, ...) {
-   va_end(args);
- }
- 
--#if defined(__BIONIC__)
-+#if defined(__BIONIC__) && !defined(__ANDROID_NDK__)
- void AsyncSafe(const char* format, ...) {
-   va_list args;
-   va_start(args, format);
 diff --git a/src/libunwindstack/MemoryMte.cpp b/src/libunwindstack/MemoryMte.cpp
 index 3841744..681aea6 100644
 --- a/src/libunwindstack/MemoryMte.cpp
@@ -34,7 +12,7 @@ index 3841744..681aea6 100644
  #else
  #define mte_supported() false
 diff --git a/src/libunwindstack/RegsArm64.cpp b/src/libunwindstack/RegsArm64.cpp
-index 99eddb0..05a1809 100644
+index cf19454..d43db7d 100644
 --- a/src/libunwindstack/RegsArm64.cpp
 +++ b/src/libunwindstack/RegsArm64.cpp
 @@ -19,7 +19,7 @@

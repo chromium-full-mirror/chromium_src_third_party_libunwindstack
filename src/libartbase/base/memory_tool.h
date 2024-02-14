@@ -28,7 +28,6 @@ namespace art {
 #if __has_feature(address_sanitizer)
 
 # include <sanitizer/asan_interface.h>
-# define ADDRESS_SANITIZER
 
 # ifdef ART_ENABLE_ADDRESS_SANITIZER
 #  define MEMORY_TOOL_MAKE_NOACCESS(p, s) __asan_poison_memory_region(p, s)
