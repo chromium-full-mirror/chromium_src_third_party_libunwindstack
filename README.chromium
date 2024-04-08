@@ -200,3 +200,12 @@ Local modifications:
 
   Correctly uses the version of `rustc_demangle` currently available in
   Chromium's `third_party`.
+
+- `0014-dont-use-bionic-functions.patch`:
+
+  Similar to `0004-dont-include-bionic-headers.patch`, don't use
+  functions/constants defined in Bionic headers.
+
+- `0015-replace-deprecated-enodata.patch`:
+
+  Replace `ENODATA` with `EIO` since `ENODATA` is deprecated in ISO C++.
