@@ -74,7 +74,7 @@ Steps to update `libunwindstack`:
     # Build `stack_unwinder` module in component debug build.
     gn gen ../../out/libunwindstack_test_build --args=" \
       target_os=\"android\" \
-      use_goma=true \
+      use_remoteexec=true \
       is_component_build=true \
       is_debug=true" && \
     autoninja -C ../../out/libunwindstack_test_build stack_unwinder
