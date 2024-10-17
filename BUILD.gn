@@ -28,7 +28,6 @@ config("warnings") {
 }
 
 source_set("libunwindstack") {
-  visibility = [ "//base:native_unwinder_android" ]
   include_dirs = [
     "//third_party/libunwindstack/src/android-base/include",
     "//third_party/libunwindstack/src/libartbase",
