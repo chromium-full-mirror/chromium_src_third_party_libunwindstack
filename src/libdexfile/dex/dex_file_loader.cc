@@ -109,8 +109,6 @@ class MemMapContainer : public DexFileContainer {
 
 }  // namespace
 
-const File DexFileLoader::kInvalidFile;
-
 bool DexFileLoader::IsMagicValid(uint32_t magic) {
   return IsMagicValid(reinterpret_cast<uint8_t*>(&magic));
 }
@@ -254,7 +252,7 @@ bool DexFileLoader::InitAndReadMagic(size_t header_offset,
     *magic = *reinterpret_cast<const uint32_t*>(root_container_->Begin() + header_offset);
   } else {
     // Open the file if we have not been given the file-descriptor directly before.
-    if (!file_->IsValid()) {
+    if (!file_) {
       CHECK(!filename_.empty());
       owned_file_ = File(filename_, O_RDONLY, /* check_usage= */ false);
       if (!owned_file_->IsValid()) {
@@ -277,7 +275,7 @@ bool DexFileLoader::MapRootContainer(std::string* error_msg) {
   }
 
   CHECK(MemMap::IsInitialized());
-  CHECK(file_->IsValid());
+  CHECK(file_);
   struct stat sbuf;
   memset(&sbuf, 0, sizeof(sbuf));
   if (fstat(file_->Fd(), &sbuf) == -1) {

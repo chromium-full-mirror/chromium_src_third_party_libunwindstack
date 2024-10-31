@@ -162,7 +162,6 @@ class DexFileLoader {
 
   DexFileLoader(const char* filename, const File* file, const std::string& location)
       : filename_(filename), file_(file), location_(location) {
-    CHECK(file != nullptr);  // Must be non-null, but may be invalid.
   }
 
   DexFileLoader(std::shared_ptr<DexFileContainer> container, const std::string& location)
@@ -180,10 +179,10 @@ class DexFileLoader {
       : DexFileLoader(/*filename=*/location.c_str(), file, location) {}
 
   DexFileLoader(const char* filename, const std::string& location)
-      : DexFileLoader(filename, /*file=*/&kInvalidFile, location) {}
+      : DexFileLoader(filename, /*file=*/nullptr, location) {}
 
   explicit DexFileLoader(const std::string& location)
-      : DexFileLoader(location.c_str(), /*file=*/&kInvalidFile, location) {}
+      : DexFileLoader(location.c_str(), /*file=*/nullptr, location) {}
 
   virtual ~DexFileLoader() {}
 
@@ -265,8 +264,6 @@ class DexFileLoader {
   }
 
  protected:
-  static const File kInvalidFile;  // Used for "no file descriptor" (-1).
-
   bool InitAndReadMagic(size_t header_offset, uint32_t* magic, std::string* error_msg);
 
   // Ensure we have root container.  If we are backed by a file, memory-map it.
@@ -324,7 +321,7 @@ class DexFileLoader {
   // The DexFileLoader can be backed either by file or by memory (i.e. DexFileContainer).
   // We can not just mmap the file since APKs might be unreasonably large for 32-bit system.
   std::string filename_;
-  const File* file_ = &kInvalidFile;
+  const File* file_ = nullptr;
   std::optional<File> owned_file_;  // May be used as backing storage for 'file_'.
   std::shared_ptr<DexFileContainer> root_container_;
   const std::string location_;

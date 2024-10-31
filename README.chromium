@@ -210,3 +210,7 @@ Local modifications:
 - `0015-replace-deprecated-enodata.patch`:
 
   Replace `ENODATA` with `EIO` since `ENODATA` is deprecated in ISO C++.
+
+- `0016-remove-static-initializers.patch`:
+
+  Remove static initializers from DexFile, dex_file_loader, and mem_map.

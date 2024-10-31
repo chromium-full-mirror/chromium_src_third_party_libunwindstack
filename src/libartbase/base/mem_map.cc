@@ -59,9 +59,6 @@ using Maps = AllocationTrackingMultiMap<void*, MemMap*, kAllocatorTagMaps>;
 // All the non-empty MemMaps. Use a multimap as we do a reserve-and-divide (eg ElfMap::Load()).
 static Maps* gMaps GUARDED_BY(MemMap::GetMemMapsLock()) = nullptr;
 
-// A map containing unique strings used for indentifying anonymous mappings
-static std::map<std::string, int> debugStrMap GUARDED_BY(MemMap::GetMemMapsLock());
-
 // Retrieve iterator to a `gMaps` entry that is known to exist.
 Maps::iterator GetGMapsEntry(const MemMap& map) REQUIRES(MemMap::GetMemMapsLock()) {
   DCHECK(map.IsValid());
@@ -283,6 +280,10 @@ void MemMap::SetDebugName(void* map_ptr, const char* name, size_t size) {
 
   std::string debug_friendly_name("dalvik-");
   debug_friendly_name += name;
+
+  // A map containing unique strings used for indentifying anonymous mappings
+  static auto& debugStrMap GUARDED_BY(MemMap::GetMemMapsLock()) = *new std::map<std::string, int>;
+
   auto it = debugStrMap.find(debug_friendly_name);
 
   if (it == debugStrMap.end()) {
