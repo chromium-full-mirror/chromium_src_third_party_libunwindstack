@@ -42,7 +42,7 @@ class MapInfo {
       : start_(start),
         end_(end),
         offset_(offset),
-        flags_(flags),
+        flags_(static_cast<uint16_t>(flags)),
         name_(name),
         elf_fields_(nullptr),
         prev_map_(prev_map) {}
@@ -50,7 +50,7 @@ class MapInfo {
       : start_(start),
         end_(end),
         offset_(offset),
-        flags_(flags),
+        flags_(static_cast<uint16_t>(flags)),
         name_(name),
         elf_fields_(nullptr) {}
 

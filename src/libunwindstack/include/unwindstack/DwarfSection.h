@@ -66,16 +66,16 @@ class DwarfSection {
       index_++;
       return *this;
     }
-    iterator& operator++(int increment) {
-      index_ += increment;
+    iterator& operator++(int) {
+      ++index_;
       return *this;
     }
     iterator& operator--() {
       index_--;
       return *this;
     }
-    iterator& operator--(int decrement) {
-      index_ -= decrement;
+    iterator& operator--(int) {
+      --index_;
       return *this;
     }
 

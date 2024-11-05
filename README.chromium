@@ -214,3 +214,7 @@ Local modifications:
 - `0016-remove-static-initializers.patch`:
 
   Remove static initializers from DexFile, dex_file_loader, and mem_map.
+
+- `0017-add-type-cast.patch`:
+
+  Add type cast and fix increment.
