@@ -218,3 +218,9 @@ Local modifications:
 - `0017-add-type-cast.patch`:
 
   Add type cast and fix increment.
+
+- `0018-handle-process-vm-readv-availability.patch`:
+
+  Handle the case where process_vm_readv is not available, given it is gated
+  on __ANDROID_API__ >= 23 in
+  third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys/uio.h
