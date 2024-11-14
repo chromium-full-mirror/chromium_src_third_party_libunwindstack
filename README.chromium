@@ -224,3 +224,7 @@ Local modifications:
   Handle the case where process_vm_readv is not available, given it is gated
   on __ANDROID_API__ >= 23 in
   third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys/uio.h
+
+- `0019-add-missing-include-in-regsinfo-header.patch`:
+
+  Add a missing include for abort() in RegsInfo.h.
