@@ -5,6 +5,7 @@ Date: Jan 29, 2023
 Version: N/A
 License: Apache 2.0 and BSD
 License File: LICENSE
+Shipped: yes
 Security Critical: yes
 
 Description: Canonical library to unwind Android call stacks.
