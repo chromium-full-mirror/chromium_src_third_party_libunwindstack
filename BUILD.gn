@@ -35,7 +35,7 @@ source_set("libunwindstack") {
     "//third_party/libunwindstack/src/libdexfile/external/include",
     "//third_party/libunwindstack/src/libprocinfo/include",
     "//third_party/libunwindstack/src/libunwindstack/include",
-    "//third_party/rust/chromium_crates_io/vendor/rustc-demangle-capi-0.1.0/include",
+    "//third_party/rust/chromium_crates_io/vendor/rustc-demangle-capi-v0_1/include",
     "//third_party/zstd/src/lib",
   ]
 
