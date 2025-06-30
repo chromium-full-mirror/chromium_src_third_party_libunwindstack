@@ -65,6 +65,7 @@
 #include <functional>
 #include <memory>
 #include <ostream>
+#include <type_traits>
 
 #include "android-base/errno_restorer.h"
 #include "android-base/macros.h"

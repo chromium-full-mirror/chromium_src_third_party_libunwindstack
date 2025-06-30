@@ -26,6 +26,7 @@
 #include <sys/prctl.h>
 #endif
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <sstream>

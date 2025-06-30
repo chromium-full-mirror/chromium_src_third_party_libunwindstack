@@ -18,6 +18,7 @@
 
 #include <ctype.h>
 
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <string_view>

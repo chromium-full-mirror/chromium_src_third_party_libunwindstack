@@ -16,6 +16,7 @@
 
 #include "compact_dex_file.h"
 
+#include <algorithm>
 #include <memory>
 
 #include "base/leb128.h"

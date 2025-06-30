@@ -16,6 +16,8 @@
 
 #include "standard_dex_file.h"
 
+#include <algorithm>
+
 #include "base/casts.h"
 #include "base/leb128.h"
 #include "code_item_accessors-inl.h"
