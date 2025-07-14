@@ -25,6 +25,8 @@ config("warnings") {
     "-Wno-shadow",
     "-Wno-unused-but-set-variable",
   ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
 }
 
 source_set("libunwindstack") {
