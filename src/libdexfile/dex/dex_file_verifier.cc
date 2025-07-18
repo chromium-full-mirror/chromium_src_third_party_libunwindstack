@@ -17,6 +17,7 @@
 #include "dex_file_verifier.h"
 
 #include <algorithm>
+#include <alloca.h>
 #include <bitset>
 #include <limits>
 #include <memory>
