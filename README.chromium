@@ -1,12 +1,13 @@
 Name: libunwindstack
 URL: https://android.googlesource.com/platform/system/unwinding
-Revision: 9ebb4981c2b9ba73018702531ded8de9c169958a
+Revision: 0928ad0d25e4af07c8be5ab06d0ca584f9f4ceb5
 Date: 2023-01-29
 Version: N/A
 License: Apache 2.0 and BSD
 License File: LICENSE
 Shipped: yes
 Security Critical: yes
+Update Mechanism: Manual
 
 Description: Canonical library to unwind Android call stacks.
 
