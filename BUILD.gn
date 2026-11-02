@@ -38,12 +38,12 @@ source_set("posix_strerror_r") {
 
 source_set("libunwindstack") {
   include_dirs = [
-    "//third_party/libunwindstack/src/android-base/include",
-    "//third_party/libunwindstack/src/libartbase",
-    "//third_party/libunwindstack/src/libdexfile",
-    "//third_party/libunwindstack/src/libdexfile/external/include",
-    "//third_party/libunwindstack/src/libprocinfo/include",
-    "//third_party/libunwindstack/src/libunwindstack/include",
+    "src/android-base/include",
+    "src/libartbase",
+    "src/libdexfile",
+    "src/libdexfile/external/include",
+    "src/libprocinfo/include",
+    "src/libunwindstack/include",
     "//third_party/rust/chromium_crates_io/vendor/rustc-demangle-capi-v0_1/include",
     "//third_party/zstd/src/lib",
   ]
