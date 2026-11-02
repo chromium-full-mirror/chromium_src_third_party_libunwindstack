@@ -3,7 +3,7 @@ URL: https://android.googlesource.com/platform/system/unwinding
 Revision: 0928ad0d25e4af07c8be5ab06d0ca584f9f4ceb5
 Date: 2023-01-29
 Version: N/A
-License: Apache 2.0 and BSD
+License: Apache-2.0, BSD-2-Clause
 License File: LICENSE
 Shipped: yes
 Security Critical: yes
