@@ -140,7 +140,6 @@ source_set("libunwindstack") {
     "src/libartbase/base/unix_file/fd_file.cc",
     "src/libartbase/base/unix_file/fd_file.h",
     "src/libartbase/base/utils.h",
-    "src/libartbase/base/utils.h",
     "src/libartbase/base/value_object.h",
     "src/libdexfile/dex/class_accessor-inl.h",
     "src/libdexfile/dex/class_accessor.h",
@@ -255,7 +254,7 @@ source_set("libunwindstack") {
     ":posix_strerror_r",
     "//third_party/lzma_sdk:lzma_sdk_xz",
     "//third_party/rust/rustc_demangle_capi/v0_1:lib",
-    "//third_party/zlib:zlib",
+    "//third_party/zlib",
     "//third_party/zstd:decompress",
   ]
   public_configs = [ ":libunwindstack_config" ]
